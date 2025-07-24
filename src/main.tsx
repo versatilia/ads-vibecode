@@ -9,9 +9,9 @@ import { setGlobalTheme } from '@atlaskit/tokens'
 function Main() {
   const [mode, setMode] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
-      return (document.documentElement.getAttribute('data-theme') as 'light' | 'dark') || 'light';
+      return (document.documentElement.getAttribute('data-theme') as 'light' | 'dark') || 'dark';
     }
-    return 'light';
+    return 'dark';
   });
 
   useEffect(() => {
