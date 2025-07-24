@@ -40,12 +40,14 @@ const HeaderLeft = styled.div`
   display: flex;
   align-items: center;
   gap: ${token('space.200')};
+  pointer-events: auto;
 `;
 
 const HeaderRight = styled.div`
   display: flex;
   align-items: center;
   gap: ${token('space.200')};
+  pointer-events: auto;
 `;
 
 const Controls = styled.div`
@@ -193,7 +195,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
 
     const svg = d3.select(svgRef.current);
     const width = window.innerWidth;
-    const height = window.innerHeight - 80;
+    const height = window.innerHeight;
 
     // Clear previous content
     svg.selectAll('*').remove();
@@ -718,7 +720,6 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         ref={svgRef}
         width="100%"
         height="100%"
-        style={{ marginTop: '80px' }}
       />
 
       {tooltip && (
