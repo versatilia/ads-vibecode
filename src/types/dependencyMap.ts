@@ -48,8 +48,14 @@ export interface Product {
 
 export interface BlastRadius {
   sourceNodeId: string;
-  affectedNodes: string[];
-  affectedLinks: string[];
+  directIssues: {
+    nodes: string[];
+    links: string[];
+  };
+  potentialIssues: {
+    nodes: string[];
+    links: string[];
+  };
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
 }

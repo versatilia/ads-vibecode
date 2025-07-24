@@ -46,11 +46,10 @@ function App({ mode, onToggleTheme }: AppProps) {
   }, [mode]);
 
   const resetApp = () => {
-    // Reset the application by toggling theme and back
-    onToggleTheme();
-    setTimeout(() => {
+    // Reset the application to light mode
+    if (mode === 'dark') {
       onToggleTheme();
-    }, 100);
+    }
   };
 
   return (

@@ -143,21 +143,14 @@ export const dependencyMapData: DependencyMapData = {
 
 export const sampleBlastRadius: BlastRadius = {
   sourceNodeId: 'payment-db',
-  affectedNodes: [
-    'payment-db', 'payment-service', 'api-gateway', 'frontend-app', 'mobile-app', 'admin-panel',
-    'user-service', 'auth-service', 'notification-service', 'analytics-service', 'email-service',
-    'user-db', 'redis-cache', 'message-queue', 'event-store', 'database-server', 'cache-server',
-    'queue-server', 'load-balancer', 'web-servers', 'vpc', 'monitoring', 'logging', 'alerting',
-    'tracing', 'metrics-db'
-  ],
-  affectedLinks: [
-    'payment-db-link', 'gateway-payment', 'payment-auth', 'frontend-api', 'mobile-api', 'admin-api',
-    'user-auth', 'notification-user', 'analytics-user', 'email-notification', 'redis-cache-payment',
-    'event-store-payment', 'database-server-payment', 'cache-server-redis', 'queue-server-message',
-    'load-balancer-web', 'web-servers-api', 'vpc-load-balancer', 'vpc-database', 'vpc-cache',
-    'vpc-queue', 'monitoring-payment', 'logging-payment', 'tracing-payment', 'metrics-db-monitoring',
-    'metrics-db-logging'
-  ],
+  directIssues: {
+    nodes: ['payment-db', 'payment-service', 'api-gateway'],
+    links: ['payment-db-link', 'gateway-payment']
+  },
+  potentialIssues: {
+    nodes: ['frontend-app', 'mobile-app', 'admin-panel', 'user-service', 'auth-service', 'notification-service', 'analytics-service', 'email-service', 'user-db', 'redis-cache', 'message-queue', 'event-store', 'database-server', 'cache-server', 'queue-server', 'load-balancer', 'web-servers', 'vpc', 'monitoring', 'logging', 'alerting', 'tracing', 'metrics-db'],
+    links: ['payment-auth', 'frontend-api', 'mobile-api', 'admin-api', 'user-auth', 'notification-user', 'analytics-user', 'email-notification', 'redis-cache-payment', 'event-store-payment', 'database-server-payment', 'cache-server-redis', 'queue-server-message', 'load-balancer-web', 'web-servers-api', 'vpc-load-balancer', 'vpc-database', 'vpc-cache', 'vpc-queue', 'monitoring-payment', 'logging-payment', 'tracing-payment', 'metrics-db-monitoring', 'metrics-db-logging']
+  },
   severity: 'critical',
   description: 'Payment database failure causing cascading impact across payment processing, user authentication, and notification systems'
 }; 

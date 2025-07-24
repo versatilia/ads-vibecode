@@ -10,6 +10,7 @@ import Toggle from '@atlaskit/toggle';
 import Select from '@atlaskit/select';
 import { AtlassianLogo } from '@atlaskit/logo';
 import ComponentIcon from '@atlaskit/icon/glyph/component';
+import WarningIcon from '@atlaskit/icon/glyph/warning';
 import { DependencyNode, DependencyLink, FilterState, BlastRadius } from '../types/dependencyMap';
 import { dependencyMapData, sampleBlastRadius } from '../data/dependencyMapData';
 
@@ -27,13 +28,12 @@ const Header = styled.div`
   left: 0;
   right: 0;
   z-index: 1000;
-  background: ${token('color.background.neutral')};
-  border-bottom: 1px solid ${token('color.border')};
   padding: ${token('space.200')} ${token('space.300')};
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: transparent;
+  pointer-events: none;
 `;
 
 const HeaderLeft = styled.div`
@@ -103,10 +103,10 @@ const LegendColor = styled.div<{ color: string }>`
   background: ${props => props.color};
 `;
 
-const NodeTooltip = styled.div`
+const NodeTooltip = styled.div<{ isDarkMode: boolean }>`
   position: absolute;
-  background: ${token('color.background.neutral')};
-  border: 1px solid ${token('color.border')};
+  background: ${props => props.isDarkMode ? '#1D2125' : '#FFFFFF'};
+  border: 1px solid ${props => props.isDarkMode ? '#42526E' : '#DFE1E6'};
   border-radius: ${token('border.radius.300')};
   padding: ${token('space.200')};
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -114,6 +114,8 @@ const NodeTooltip = styled.div`
   z-index: 10000;
   max-width: 250px;
   font-size: 12px;
+  backdrop-filter: none;
+  color: ${props => props.isDarkMode ? '#E6FCFF' : '#172B4D'};
 `;
 
 interface DependencyMapProps {
@@ -140,6 +142,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
   // Removed selectedNode state to prevent unnecessary re-renders
   const [tooltip, setTooltip] = useState<{ x: number; y: number; content: string } | null>(null);
   const simulationRef = useRef<d3.Simulation<any, any> | null>(null);
+  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>('light');
 
   // Create color scales
   const domainColorScale = d3.scaleOrdinal<string, string>()
@@ -170,6 +173,14 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
       nodeIds.has(link.source) && nodeIds.has(link.target)
     );
   }, [data.links, filteredNodes]);
+
+
+
+  // Check current theme
+  useEffect(() => {
+    const theme = document.documentElement.getAttribute('data-theme') as 'light' | 'dark' || 'light';
+    setCurrentTheme(theme);
+  });
 
   // Initialize D3 visualization
   useEffect(() => {
@@ -205,8 +216,8 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
     }
 
     // Get theme-aware colors
-    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
-    const nodeBackgroundColor = isDarkMode ? '#1D2125' : '#FAFBFC';
+    const isDarkMode = currentTheme === 'dark';
+    const nodeBackgroundColor = isDarkMode ? '#1D2125' : '#FFFFFF';
     const borderColor = isDarkMode ? '#42526E' : '#DFE1E6';
     const textColor = isDarkMode ? '#E6FCFF' : '#172B4D';
 
@@ -228,11 +239,29 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
       .data(filteredLinks)
       .enter()
       .append('line')
-      .attr('stroke', borderColor)
-      .attr('stroke-width', 1)
+      .attr('stroke', (d: any) => {
+        if (filterState.showBlastRadius && filterState.blastRadiusData) {
+          if (filterState.blastRadiusData.directIssues.links.includes(d.id) || 
+              filterState.blastRadiusData.potentialIssues.links.includes(d.id)) {
+            return '#FF5630'; // Red for all affected links
+          }
+          return borderColor;
+        }
+        return borderColor;
+      })
+      .attr('stroke-width', (d: any) => {
+        if (filterState.showBlastRadius && filterState.blastRadiusData) {
+          if (filterState.blastRadiusData.directIssues.links.includes(d.id) || 
+              filterState.blastRadiusData.potentialIssues.links.includes(d.id)) {
+            return 2;
+          }
+        }
+        return 1;
+      })
       .attr('stroke-opacity', (d: any) => {
         if (filterState.showBlastRadius && filterState.blastRadiusData) {
-          if (filterState.blastRadiusData.affectedLinks.includes(d.id)) {
+          if (filterState.blastRadiusData.directIssues.links.includes(d.id) || 
+              filterState.blastRadiusData.potentialIssues.links.includes(d.id)) {
             return 1;
           }
           return 0.3;
@@ -286,12 +315,39 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
       .attr('width', (d: any) => Math.max(140, d.name.length * 10))
       .attr('height', 50)
       .attr('rx', 8)
-      .attr('fill', nodeBackgroundColor)
-      .attr('stroke', borderColor)
-      .attr('stroke-width', 1)
+      .attr('fill', (d: any) => {
+        if (filterState.showBlastRadius && filterState.blastRadiusData) {
+          if (filterState.blastRadiusData.directIssues.nodes.includes(d.id)) {
+            return '#FF5630'; // Solid red for direct issues
+          }
+          if (filterState.blastRadiusData.potentialIssues.nodes.includes(d.id)) {
+            return '#FF5630'; // Red for potential issues (changed from orange)
+          }
+        }
+        return nodeBackgroundColor;
+      })
+      .attr('stroke', (d: any) => {
+        if (filterState.showBlastRadius && filterState.blastRadiusData) {
+          if (filterState.blastRadiusData.directIssues.nodes.includes(d.id) || 
+              filterState.blastRadiusData.potentialIssues.nodes.includes(d.id)) {
+            return '#FF5630'; // Red for all affected nodes
+          }
+        }
+        return borderColor;
+      })
+      .attr('stroke-width', (d: any) => {
+        if (filterState.showBlastRadius && filterState.blastRadiusData) {
+          if (filterState.blastRadiusData.directIssues.nodes.includes(d.id) || 
+              filterState.blastRadiusData.potentialIssues.nodes.includes(d.id)) {
+            return 3;
+          }
+        }
+        return 1;
+      })
       .attr('opacity', (d: any): number => {
         if (filterState.showBlastRadius && filterState.blastRadiusData) {
-          if (filterState.blastRadiusData.affectedNodes.includes(d.id) || 
+          if (filterState.blastRadiusData.directIssues.nodes.includes(d.id) || 
+              filterState.blastRadiusData.potentialIssues.nodes.includes(d.id) || 
               d.id === filterState.blastRadiusData.sourceNodeId) {
             return 1;
           }
@@ -300,21 +356,62 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         return 1;
       });
 
-    // Icon removed - using clean text-only design
+    // Add warning icons to affected nodes
+    nodes.filter((d: any) => {
+      if (filterState.showBlastRadius && filterState.blastRadiusData) {
+        return filterState.blastRadiusData.directIssues.nodes.includes(d.id) || 
+               filterState.blastRadiusData.potentialIssues.nodes.includes(d.id);
+      }
+      return false;
+    })
+    .append('circle')
+      .attr('cx', (d: any) => Math.max(140, d.name.length * 10) - 15)
+      .attr('cy', 15)
+      .attr('r', 8)
+      .attr('fill', '#FFFFFF')
+      .attr('stroke', '#FF5630')
+      .attr('stroke-width', 1);
+
+    // Add warning icon symbol to affected nodes
+    nodes.filter((d: any) => {
+      if (filterState.showBlastRadius && filterState.blastRadiusData) {
+        return filterState.blastRadiusData.directIssues.nodes.includes(d.id) || 
+               filterState.blastRadiusData.potentialIssues.nodes.includes(d.id);
+      }
+      return false;
+    })
+    .append('text')
+      .attr('x', (d: any) => Math.max(140, d.name.length * 10) - 15)
+      .attr('y', 18)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#FF5630')
+      .attr('font-size', '12px')
+      .attr('font-weight', 'bold')
+      .style('pointer-events', 'none')
+      .text('!');
 
     // Add text to nodes - positioned for larger rectangles
     nodes.append('text')
       .attr('x', (d: any) => Math.max(140, d.name.length * 10) / 2)
       .attr('y', 32)
       .attr('text-anchor', 'middle')
-      .attr('fill', textColor)
+      .attr('fill', (d: any) => {
+        if (filterState.showBlastRadius && filterState.blastRadiusData) {
+          if (filterState.blastRadiusData.directIssues.nodes.includes(d.id) || 
+              filterState.blastRadiusData.potentialIssues.nodes.includes(d.id)) {
+            return '#FFFFFF'; // White text for all affected nodes
+          }
+        }
+        return textColor;
+      })
       .attr('font-size', '13px')
       .attr('font-weight', '600')
       .style('pointer-events', 'none') // Prevent text from blocking events
       .text((d: any) => d.name)
       .attr('opacity', (d: any): number => {
         if (filterState.showBlastRadius && filterState.blastRadiusData) {
-          if (filterState.blastRadiusData.affectedNodes.includes(d.id) || 
+          if (filterState.blastRadiusData.directIssues.nodes.includes(d.id) || 
+              filterState.blastRadiusData.potentialIssues.nodes.includes(d.id) || 
               d.id === filterState.blastRadiusData.sourceNodeId) {
             return 1;
           }
@@ -339,7 +436,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         simulationRef.current.stop();
       }
     };
-  }, [filteredNodes, filteredLinks, filterState.showBlastRadius, filterState.blastRadiusData]);
+  }, [filteredNodes, filteredLinks, filterState.showBlastRadius, filterState.blastRadiusData, currentTheme]);
 
   // Removed highlightDependencies function to prevent map expansion and line disappearance
 
@@ -450,7 +547,6 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
 
       <Controls>
         <ControlGroup>
-          <ControlLabel>Products</ControlLabel>
           <Select
             inputId="product-select"
             className="product-select"
@@ -475,7 +571,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
               }));
             }}
             isMulti
-            placeholder="Select products..."
+            placeholder="Product"
             styles={{
               control: (provided: any) => ({
                 ...provided,
@@ -496,7 +592,6 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         </ControlGroup>
 
         <ControlGroup>
-          <ControlLabel>Domains</ControlLabel>
           <Select
             inputId="domain-select"
             className="domain-select"
@@ -521,7 +616,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
               }));
             }}
             isMulti
-            placeholder="Select domains..."
+            placeholder="Domain"
             styles={{
               control: (provided: any) => ({
                 ...provided,
@@ -542,7 +637,6 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         </ControlGroup>
 
         <ControlGroup>
-          <ControlLabel>Teams</ControlLabel>
           <Select
             inputId="team-select"
             className="team-select"
@@ -567,7 +661,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
               }));
             }}
             isMulti
-            placeholder="Select teams..."
+            placeholder="Team"
             styles={{
               control: (provided: any) => ({
                 ...provided,
@@ -614,11 +708,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
           <>
             <LegendItem>
               <LegendColor color="#FF5630" />
-              <span>Incident Source</span>
-            </LegendItem>
-            <LegendItem>
-              <LegendColor color="#FF8B00" />
-              <span>Affected</span>
+              <span>Affected Services</span>
             </LegendItem>
           </>
         )}
@@ -633,6 +723,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
 
       {tooltip && (
         <NodeTooltip
+          isDarkMode={currentTheme === 'dark'}
           style={{
             left: tooltip.x,
             top: tooltip.y
@@ -655,7 +746,15 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
           maxWidth: '300px',
           zIndex: 1000
         }}>
-          <Heading size="small">Active Incident</Heading>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: token('space.100'),
+            marginBottom: token('space.100')
+          }}>
+            <WarningIcon label="Warning" primaryColor={token('color.icon.warning')} />
+            <Heading size="small">Active Incident</Heading>
+          </div>
           <Text size="small" color="color.text.subtle">
             {filterState.blastRadiusData.description}
           </Text>
