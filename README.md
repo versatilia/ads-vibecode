@@ -1,48 +1,100 @@
-# Interactive Dependency Map with Blast Radius Analysis
+# Wikipedia Architecture Dependency Map
 
-A comprehensive visualization tool for software architecture and ITOps assets, enabling cross-cut inspection by technical and organizational dimensions with real-time blast radius analysis.
+An interactive software architecture dependency map for Wikipedia based on its open-source system. This visualization shows the complex relationships between different layers and components of Wikipedia's infrastructure.
 
-## 🚀 Features
+## 🏗️ Architecture Layers
 
-### Core Functionality
-- **Interactive Force-Directed Graph**: 35+ nodes and 60+ links representing a realistic microservices architecture
-- **Multi-Dimensional Filtering**: Filter by domains (Application, Data, Infrastructure, Security, Observability) and teams
-- **Real-Time Blast Radius Analysis**: Visualize impact of incidents with cascading dependency effects
-- **Zoom, Pan & Search**: Full interactive navigation with D3.js force simulation
-- **Node Inspection**: Detailed metadata tooltips showing team ownership, version, and deployment status
+### 1. **Frontend Layer** (Blue - #0052CC)
+- **Wikipedia Web**: Main web interface with responsive design
+- **Mobile Web**: Mobile-optimized Wikipedia interface  
+- **Wikipedia App**: Native mobile application (React Native)
+- **Vector Skin**: Default MediaWiki skin for Wikipedia
 
-### Architecture Domains
-- **Application Layer**: Frontend apps, API Gateway, microservices
-- **Data Layer**: Databases, caches, message queues, event stores
-- **Infrastructure**: Load balancers, servers, VPC, CDN
-- **Security**: WAF, VPN, key management
-- **Observability**: Monitoring, logging, alerting, tracing
+### 2. **Application Layer** (Green - #36B37E)
+- **MediaWiki Core**: Core PHP application handling page rendering and editing
+- **Parser**: Wikitext parser converting markup to HTML
+- **Extension Manager**: Manages MediaWiki extensions and plugins
+- **User Management**: Handles user accounts, authentication, and permissions
+- **Content Management**: Manages article content, revisions, and history
+- **File Upload**: Handles file uploads and media management
 
-### Blast Radius Visualization
-- **Incident Simulation**: Start incidents from any critical component
-- **Impact Visualization**: Red highlighting for incident source, orange for affected components
-- **Cascading Effects**: Shows how failures propagate through the system
-- **Realistic Impact**: 25+ components affected in sample scenarios
+### 3. **API Layer** (Orange - #FF8B00)
+- **RESTBase**: RESTful API service for Wikipedia content (Node.js)
+- **GraphQL API**: GraphQL endpoint for flexible data queries
+- **Action API**: MediaWiki action API for programmatic access
+- **Mobile API**: Optimized API endpoints for mobile applications
 
-## 🛠️ Technical Stack
+### 4. **Service Layer** (Purple - #6554C0)
+- **Job Queue**: Background job processing for maintenance tasks (Redis)
+- **Search Service**: Full-text search across Wikipedia articles (Elasticsearch)
+- **Cache Service**: Caching layer for frequently accessed data (Redis)
+- **Notification Service**: Handles user notifications and alerts
+- **Email Service**: Email delivery for user communications
+- **Analytics Service**: Page view and user behavior analytics
 
-### Frontend
-- **React 18** with TypeScript
-- **D3.js** for force-directed graph visualization
-- **Atlassian Design System** for UI components
-- **Framer Motion** for animations
-- **Emotion** for styled components
+### 5. **Data Layer** (Red - #FF5630)
+- **MariaDB Primary**: Primary database for Wikipedia content and metadata
+- **MariaDB Replica**: Read replicas for load distribution
+- **MariaDB Analytics**: Analytics database for reporting and metrics
+- **Elasticsearch Cluster**: Search index cluster for full-text search
+- **Redis Cluster**: In-memory cache and session storage
+- **Object Storage**: Distributed storage for media files and backups
+- **Backup Storage**: Long-term backup storage for disaster recovery
 
-### Backend
-- **Node.js/Express** API server
-- **CORS** enabled for cross-origin requests
-- **RESTful endpoints** for dependency data and blast radius calculations
+### 6. **Infrastructure Layer** (Cyan - #00B8D9)
+- **Varnish Cache**: HTTP accelerator and reverse proxy cache
+- **Load Balancer**: Traffic distribution across application servers (HAProxy)
+- **App Servers**: Application servers running MediaWiki (PHP-FPM)
+- **Database Servers**: Dedicated servers for MariaDB databases
+- **Search Servers**: Dedicated servers for Elasticsearch
+- **Cache Servers**: Dedicated servers for Redis caching
+- **CDN**: Content delivery network for global performance (CloudFlare)
+- **DNS**: Domain name system for Wikipedia domains (BIND)
+- **Puppet Master**: Configuration management for infrastructure
+- **Monitoring**: System monitoring and alerting (Prometheus)
+- **Logging**: Centralized logging and log analysis (ELK Stack)
+- **CI/CD**: Continuous integration and deployment pipeline (Jenkins)
 
-### Data Model
-- **35+ Nodes**: Services, databases, infrastructure components
-- **60+ Links**: Horizontal and vertical dependencies
-- **5 Domains**: Application, Data, Infrastructure, Security, Observability
-- **6 Teams**: Frontend, Backend, Data, Platform, Security, SRE
+## 🔗 Dependency Types
+
+### Vertical Dependencies
+- **Frontend → Application**: Web interfaces connect to MediaWiki core
+- **Application → Data**: MediaWiki connects to MariaDB databases
+- **Services → Data**: Backend services connect to their respective data stores
+- **Infrastructure → All Layers**: Infrastructure components support all layers
+
+### Horizontal Dependencies
+- **Frontend → API**: Web and mobile apps use RESTBase and GraphQL APIs
+- **Application → Services**: MediaWiki core integrates with job queue, search, and caching
+- **API → Application**: APIs connect to MediaWiki action API
+- **Service-to-Service**: Services communicate with each other (e.g., notifications → email)
+
+## 🎯 Key Features
+
+### Interactive Visualization
+- **Zoom & Pan**: Navigate through the architecture with smooth zoom and pan controls
+- **Node Details**: Hover over nodes to see detailed information including:
+  - Component description
+  - Technology stack
+  - Team ownership
+  - Deployment status
+  - Version information
+
+### Filtering & Controls
+- **Domain Filtering**: Filter by architecture layers (Frontend, Application, API, Services, Data, Infrastructure)
+- **Team Filtering**: Filter by team ownership
+- **Product Filtering**: Filter by product (Wikipedia, MediaWiki, RESTBase)
+- **Status Filtering**: Filter by health status
+
+### Blast Radius Analysis
+- **Impact Visualization**: See how failures in one component affect the entire system
+- **Cascading Effects**: Visualize both direct and potential impact paths
+- **Critical Paths**: Identify the most critical dependencies in the system
+
+### Real-time Updates
+- **Live Status**: Real-time health status of all components
+- **Dynamic Layout**: Force-directed graph layout that adapts to changes
+- **Responsive Design**: Works on desktop and mobile devices
 
 ## 🚀 Getting Started
 
@@ -63,161 +115,64 @@ npm install
 npm run dev
 ```
 
-### Running the Backend API (Optional)
-```bash
-# Install backend dependencies
-npm install express cors @types/express @types/cors
+### Usage
+1. **Navigate**: Use mouse wheel to zoom, drag to pan
+2. **Explore**: Hover over nodes to see detailed information
+3. **Filter**: Use the control panel to filter by domain, team, or product
+4. **Analyze**: Enable blast radius to see impact analysis
+5. **Reset**: Use the reset view button to return to the initial state
 
-# Start the API server
-node src/server/index.js
-```
+## 🛠️ Technology Stack
 
-The API will be available at `http://localhost:3001`
+- **Frontend**: React 18, TypeScript, D3.js
+- **Styling**: Atlaskit Design System, Emotion
+- **Visualization**: D3.js force simulation
+- **Build Tool**: Vite
+- **Development**: Hot reload with Vite dev server
 
-## 📊 Usage
+## 📊 Architecture Insights
 
-### Basic Navigation
-1. **Zoom**: Mouse wheel or pinch gestures
-2. **Pan**: Click and drag on empty space
-3. **Node Selection**: Click on any node to highlight its dependencies
-4. **Tooltips**: Hover over nodes for detailed information
+### High Availability Design
+- **Database Replication**: MariaDB primary with read replicas
+- **Load Balancing**: HAProxy distributes traffic across app servers
+- **Caching Layers**: Multiple caching layers (Varnish, Redis)
+- **CDN**: Global content delivery for performance
 
-### Filtering
-- **Domain Filter**: Toggle visibility of different architectural layers
-- **Team Filter**: Show/hide components by team ownership
-- **Status Filter**: Filter by operational status (healthy, degraded, down, warning)
+### Scalability Patterns
+- **Horizontal Scaling**: Multiple app servers behind load balancer
+- **Database Sharding**: Separate databases for different purposes
+- **Service Separation**: Microservices architecture for different functions
+- **Caching Strategy**: Multi-level caching for optimal performance
 
-### Blast Radius Analysis
-1. Click the "Blast radius" button in the header
-2. View the simulated incident starting from the Payment Database
-3. Observe how the failure cascades through connected components
-4. Red nodes indicate the incident source
-5. Orange nodes show affected components
-6. Dimmed nodes represent unaffected components
+### Monitoring & Observability
+- **Comprehensive Monitoring**: Prometheus for metrics collection
+- **Centralized Logging**: ELK stack for log aggregation
+- **Configuration Management**: Puppet for infrastructure automation
+- **CI/CD Pipeline**: Jenkins for automated deployments
 
-### API Endpoints
+## 🔍 Use Cases
 
-#### Get All Dependencies
-```http
-GET /api/dependencies
-```
+### For Engineers
+- **System Understanding**: Quickly understand Wikipedia's architecture
+- **Impact Analysis**: Assess the impact of changes or failures
+- **Dependency Mapping**: Identify critical dependencies
+- **Troubleshooting**: Visualize failure propagation paths
 
-#### Get Nodes by Domain
-```http
-GET /api/dependencies/domain/:domainId
-```
+### For Operations
+- **Incident Response**: Quickly identify affected services during outages
+- **Capacity Planning**: Understand resource dependencies
+- **Change Management**: Assess the impact of infrastructure changes
+- **Documentation**: Visual reference for system architecture
 
-#### Get Nodes by Team
-```http
-GET /api/dependencies/team/:teamId
-```
-
-#### Get Node Dependencies
-```http
-GET /api/dependencies/node/:nodeId
-```
-
-#### Calculate Blast Radius
-```http
-POST /api/blast-radius
-Content-Type: application/json
-
-{
-  "sourceNodeId": "payment-db"
-}
-```
-
-#### Get Sample Blast Radius
-```http
-GET /api/blast-radius/sample
-```
-
-## 🏗️ Architecture
-
-### Sample Microservices Architecture
-The dependency map includes a realistic microservices architecture with:
-
-**UI Layer**
-- Frontend App, Mobile App, Admin Panel
-
-**Service Layer**
-- API Gateway, User Service, Auth Service, Payment Service
-- Notification Service, Analytics Service, Search Service
-- File Service, Email Service
-
-**Data Layer**
-- User DB, Payment DB, Analytics DB, Search Index
-- File Storage, Redis Cache, Message Queue, Event Store
-
-**Infrastructure**
-- Load Balancer, Web Servers, Database Server
-- Cache Server, Queue Server, CDN, VPC
-
-**Security**
-- WAF, VPN, Key Management
-
-**Observability**
-- Monitoring, Logging, Alerting, Tracing, Metrics Database
-
-### Dependency Types
-- **Horizontal Dependencies**: Peer-to-peer service communication
-- **Vertical Dependencies**: Layered stack relationships (UI → Service → Data → Infrastructure)
-
-## 🎨 Design System
-
-Built with Atlassian Design System components:
-- **Colors**: Semantic color tokens for domains and status
-- **Typography**: Consistent heading and text styles
-- **Spacing**: Token-based spacing system
-- **Elevation**: Layered UI with proper shadows
-- **Interactive Elements**: Buttons, badges, toggles, tooltips
-
-## 🔧 Development
-
-### Project Structure
-```
-src/
-├── components/
-│   └── DependencyMap.tsx    # Main visualization component
-├── data/
-│   └── dependencyMapData.ts # Sample architecture data
-├── types/
-│   └── dependencyMap.ts     # TypeScript interfaces
-├── server/
-│   └── index.ts            # Express API server
-└── App.tsx                 # Main application
-```
-
-### Key Components
-- **DependencyMap**: Main D3.js visualization with force simulation
-- **Filter Controls**: Domain and team filtering interface
-- **Blast Radius**: Incident impact visualization
-- **Node Tooltips**: Detailed component information
-- **Legend**: Color coding and status indicators
-
-## 🚨 Blast Radius Feature
-
-The blast radius feature demonstrates realistic incident impact:
-
-1. **Incident Source**: Payment Database failure (red)
-2. **Direct Impact**: Payment Service, API Gateway (orange)
-3. **Cascading Effects**: User authentication, notifications, analytics
-4. **Infrastructure Impact**: Database servers, monitoring systems
-5. **Observability Impact**: Logging, alerting, metrics collection
-
-This shows how a single database failure can affect 25+ components across all architectural layers.
-
-## 📈 Future Enhancements
-
-- **Real-time Data**: Live status updates from monitoring systems
-- **Historical Analysis**: Track dependency changes over time
-- **Performance Metrics**: Latency and throughput visualization
-- **Deployment Tracking**: Version and deployment status integration
-- **Team Collaboration**: Shared annotations and incident notes
-- **Export Capabilities**: PDF reports and data export
-- **Advanced Filtering**: Custom query builder for complex filters
+### For Management
+- **System Overview**: High-level view of Wikipedia's complexity
+- **Risk Assessment**: Identify single points of failure
+- **Resource Planning**: Understand team and technology dependencies
+- **Strategic Planning**: Visualize architectural evolution
 
 ## 🤝 Contributing
+
+This project is part of the Atlaskit Design System showcase. Contributions are welcome!
 
 1. Fork the repository
 2. Create a feature branch
@@ -227,4 +182,15 @@ This shows how a single database failure can affect 25+ components across all ar
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- **Wikipedia Foundation**: For the open-source MediaWiki platform
+- **Atlassian**: For the Atlaskit Design System
+- **D3.js Community**: For the powerful visualization library
+- **Open Source Community**: For the various tools and libraries used
+
+---
+
+*This dependency map represents a simplified view of Wikipedia's actual architecture. The real system is more complex with additional components, security layers, and edge cases.*

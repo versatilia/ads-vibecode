@@ -1,156 +1,182 @@
 import { DependencyMapData, BlastRadius } from '../types/dependencyMap';
+import { 
+  generateDomainOwner, 
+  generateTeamOwner, 
+  generateProductOwner, 
+  generateBusinessUnitOwner 
+} from '../utils/ownerGenerator';
 
 export const dependencyMapData: DependencyMapData = {
   domains: [
-    { id: 'application', name: 'Application', color: '#0052CC', description: 'Application services and UI components' },
-    { id: 'data', name: 'Data', color: '#36B37E', description: 'Databases, storage, and data processing' },
-    { id: 'infra', name: 'Infrastructure', color: '#FF5630', description: 'Servers, networking, and cloud services' },
-    { id: 'security', name: 'Security', color: '#FF8B00', description: 'Security services and compliance' },
-    { id: 'observability', name: 'Observability', color: '#6554C0', description: 'Monitoring, logging, and alerting' }
+    { id: 'frontend', name: 'Frontend', color: '#0052CC', description: 'User interface and client-side components', owner: generateDomainOwner('frontend') },
+    { id: 'application', name: 'Application', color: '#36B37E', description: 'MediaWiki PHP application layer', owner: generateDomainOwner('application') },
+    { id: 'api', name: 'API', color: '#FF8B00', description: 'REST and GraphQL API services', owner: generateDomainOwner('api') },
+    { id: 'services', name: 'Services', color: '#6554C0', description: 'Backend services and job queues', owner: generateDomainOwner('services') },
+    { id: 'data', name: 'Data', color: '#FF5630', description: 'Databases, storage, and data processing', owner: generateDomainOwner('data') },
+    { id: 'infrastructure', name: 'Infrastructure', color: '#00B8D9', description: 'Servers, networking, and deployment', owner: generateDomainOwner('infrastructure') }
   ],
   teams: [
-    { id: 'frontend', name: 'Frontend Team', businessUnit: 'Engineering', color: '#0052CC' },
-    { id: 'backend', name: 'Backend Team', businessUnit: 'Engineering', color: '#36B37E' },
-    { id: 'data', name: 'Data Team', businessUnit: 'Engineering', color: '#FF5630' },
-    { id: 'platform', name: 'Platform Team', businessUnit: 'Engineering', color: '#FF8B00' },
-    { id: 'security', name: 'Security Team', businessUnit: 'Security', color: '#6554C0' },
-    { id: 'sre', name: 'SRE Team', businessUnit: 'Operations', color: '#00B8D9' }
+    { id: 'frontend-team', name: 'Frontend Team', businessUnit: 'Engineering', color: '#0052CC', owner: generateTeamOwner('frontend-team') },
+    { id: 'mediawiki-team', name: 'MediaWiki Team', businessUnit: 'Engineering', color: '#36B37E', owner: generateTeamOwner('mediawiki-team') },
+    { id: 'api-team', name: 'API Team', businessUnit: 'Engineering', color: '#FF8B00', owner: generateTeamOwner('api-team') },
+    { id: 'platform-team', name: 'Platform Team', businessUnit: 'Engineering', color: '#6554C0', owner: generateTeamOwner('platform-team') },
+    { id: 'data-team', name: 'Data Team', businessUnit: 'Engineering', color: '#FF5630', owner: generateTeamOwner('data-team') },
+    { id: 'infra-team', name: 'Infrastructure Team', businessUnit: 'Operations', color: '#00B8D9', owner: generateTeamOwner('infra-team') }
   ],
   products: [
-    { id: 'jira', name: 'Jira', color: '#0052CC' },
-    { id: 'confluence', name: 'Confluence', color: '#36B37E' },
-    { id: 'bitbucket', name: 'Bitbucket', color: '#FF5630' }
+    { id: 'wikipedia', name: 'Wikipedia', color: '#0052CC', owner: generateProductOwner('wikipedia') },
+    { id: 'mediawiki', name: 'MediaWiki', color: '#36B37E', owner: generateProductOwner('mediawiki') },
+    { id: 'restbase', name: 'RESTBase', color: '#FF8B00', owner: generateProductOwner('restbase') }
+  ],
+  businessUnits: [
+    { id: 'engineering', name: 'Engineering', owner: generateBusinessUnitOwner('Engineering') },
+    { id: 'operations', name: 'Operations', owner: generateBusinessUnitOwner('Operations') }
   ],
   nodes: [
-    // UI Layer
-    { id: 'frontend-app', name: 'Frontend App', type: 'ui', domain: 'application', team: 'frontend', product: 'jira', businessUnit: 'Engineering', status: 'healthy', version: '2.1.0', deploymentStatus: 'deployed' },
-    { id: 'mobile-app', name: 'Mobile App', type: 'ui', domain: 'application', team: 'frontend', product: 'jira', businessUnit: 'Engineering', status: 'healthy', version: '1.8.2', deploymentStatus: 'deployed' },
-    { id: 'admin-panel', name: 'Admin Panel', type: 'ui', domain: 'application', team: 'frontend', product: 'jira', businessUnit: 'Engineering', status: 'healthy', version: '1.5.1', deploymentStatus: 'deployed' },
+    // Frontend Layer
+    { id: 'wikipedia-web', name: 'Wikipedia Web', type: 'frontend', domain: 'frontend', team: 'frontend-team', product: 'wikipedia', businessUnit: 'Engineering', status: 'healthy', version: 'HTML/CSS/JS', deploymentStatus: 'deployed', description: 'Main Wikipedia web interface with responsive design' },
+    { id: 'mobile-web', name: 'Mobile Web', type: 'frontend', domain: 'frontend', team: 'frontend-team', product: 'wikipedia', businessUnit: 'Engineering', status: 'healthy', version: 'HTML/CSS/JS', deploymentStatus: 'deployed', description: 'Mobile-optimized Wikipedia interface' },
+    { id: 'wikipedia-app', name: 'Wikipedia App', type: 'frontend', domain: 'frontend', team: 'frontend-team', product: 'wikipedia', businessUnit: 'Engineering', status: 'healthy', version: 'React Native', deploymentStatus: 'deployed', description: 'Native mobile application for Wikipedia' },
+    { id: 'vector-skin', name: 'Vector Skin', type: 'frontend', domain: 'frontend', team: 'frontend-team', product: 'wikipedia', businessUnit: 'Engineering', status: 'healthy', version: 'CSS/JS', deploymentStatus: 'deployed', description: 'Default MediaWiki skin for Wikipedia' },
+    
+    // Application Layer (MediaWiki PHP)
+    { id: 'mediawiki-core', name: 'MediaWiki Core', type: 'application', domain: 'application', team: 'mediawiki-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'PHP 8.1', deploymentStatus: 'deployed', description: 'Core MediaWiki application handling page rendering and editing' },
+    { id: 'parser', name: 'Parser', type: 'application', domain: 'application', team: 'mediawiki-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'PHP', deploymentStatus: 'deployed', description: 'Wikitext parser converting markup to HTML' },
+    { id: 'extension-manager', name: 'Extension Manager', type: 'application', domain: 'application', team: 'mediawiki-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'PHP', deploymentStatus: 'deployed', description: 'Manages MediaWiki extensions and plugins' },
+    { id: 'user-management', name: 'User Management', type: 'application', domain: 'application', team: 'mediawiki-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'PHP', deploymentStatus: 'deployed', description: 'Handles user accounts, authentication, and permissions' },
+    { id: 'content-management', name: 'Content Management', type: 'application', domain: 'application', team: 'mediawiki-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'PHP', deploymentStatus: 'deployed', description: 'Manages article content, revisions, and history' },
+    { id: 'file-upload', name: 'File Upload', type: 'application', domain: 'application', team: 'mediawiki-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'PHP', deploymentStatus: 'deployed', description: 'Handles file uploads and media management' },
+    
+    // API Layer
+    { id: 'restbase', name: 'RESTBase', type: 'api', domain: 'api', team: 'api-team', product: 'restbase', businessUnit: 'Engineering', status: 'healthy', version: 'Node.js', deploymentStatus: 'deployed', description: 'RESTful API service for Wikipedia content' },
+    { id: 'graphql-api', name: 'GraphQL API', type: 'api', domain: 'api', team: 'api-team', product: 'restbase', businessUnit: 'Engineering', status: 'healthy', version: 'Node.js', deploymentStatus: 'deployed', description: 'GraphQL endpoint for flexible data queries' },
+    { id: 'action-api', name: 'Action API', type: 'api', domain: 'api', team: 'api-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'PHP', deploymentStatus: 'deployed', description: 'MediaWiki action API for programmatic access' },
+    { id: 'mobile-api', name: 'Mobile API', type: 'api', domain: 'api', team: 'api-team', product: 'restbase', businessUnit: 'Engineering', status: 'healthy', version: 'Node.js', deploymentStatus: 'deployed', description: 'Optimized API endpoints for mobile applications' },
     
     // Service Layer
-    { id: 'api-gateway', name: 'API Gateway', type: 'service', domain: 'application', team: 'backend', product: 'jira', businessUnit: 'Engineering', status: 'healthy', version: '3.2.0', deploymentStatus: 'deployed' },
-    { id: 'user-service', name: 'User Service', type: 'service', domain: 'application', team: 'backend', product: 'jira', businessUnit: 'Engineering', status: 'healthy', version: '2.4.1', deploymentStatus: 'deployed' },
-    { id: 'auth-service', name: 'Auth Service', type: 'service', domain: 'application', team: 'backend', product: 'jira', businessUnit: 'Engineering', status: 'healthy', version: '1.9.3', deploymentStatus: 'deployed' },
-    { id: 'payment-service', name: 'Payment Service', type: 'service', domain: 'application', team: 'backend', product: 'jira', businessUnit: 'Engineering', status: 'healthy', version: '2.7.0', deploymentStatus: 'deployed' },
-    { id: 'notification-service', name: 'Notification Service', type: 'service', domain: 'application', team: 'backend', product: 'jira', businessUnit: 'Engineering', status: 'healthy', version: '1.6.2', deploymentStatus: 'deployed' },
-    { id: 'analytics-service', name: 'Analytics Service', type: 'service', domain: 'application', team: 'backend', product: 'confluence', businessUnit: 'Engineering', status: 'healthy', version: '2.0.1', deploymentStatus: 'deployed' },
-    { id: 'search-service', name: 'Search Service', type: 'service', domain: 'application', team: 'backend', product: 'confluence', businessUnit: 'Engineering', status: 'healthy', version: '1.8.5', deploymentStatus: 'deployed' },
-    { id: 'file-service', name: 'File Service', type: 'service', domain: 'application', team: 'backend', product: 'confluence', businessUnit: 'Engineering', status: 'healthy', version: '1.4.3', deploymentStatus: 'deployed' },
-    { id: 'email-service', name: 'Email Service', type: 'service', domain: 'application', team: 'backend', product: 'confluence', businessUnit: 'Engineering', status: 'healthy', version: '1.2.1', deploymentStatus: 'deployed' },
+    { id: 'job-queue', name: 'Job Queue', type: 'service', domain: 'services', team: 'platform-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'Redis', deploymentStatus: 'deployed', description: 'Background job processing for maintenance tasks' },
+    { id: 'search-service', name: 'Search Service', type: 'service', domain: 'services', team: 'platform-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'Elasticsearch', deploymentStatus: 'deployed', description: 'Full-text search across Wikipedia articles' },
+    { id: 'cache-service', name: 'Cache Service', type: 'service', domain: 'services', team: 'platform-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'Redis', deploymentStatus: 'deployed', description: 'Caching layer for frequently accessed data' },
+    { id: 'notification-service', name: 'Notification Service', type: 'service', domain: 'services', team: 'platform-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'Node.js', deploymentStatus: 'deployed', description: 'Handles user notifications and alerts' },
+    { id: 'email-service', name: 'Email Service', type: 'service', domain: 'services', team: 'platform-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'SMTP', deploymentStatus: 'deployed', description: 'Email delivery for user communications' },
+    { id: 'analytics-service', name: 'Analytics Service', type: 'service', domain: 'services', team: 'platform-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'Python', deploymentStatus: 'deployed', description: 'Page view and user behavior analytics' },
     
     // Data Layer
-    { id: 'user-db', name: 'User Database', type: 'database', domain: 'data', team: 'data', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'PostgreSQL 14', deploymentStatus: 'deployed' },
-    { id: 'payment-db', name: 'Payment Database', type: 'database', domain: 'data', team: 'data', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'PostgreSQL 14', deploymentStatus: 'deployed' },
-    { id: 'analytics-db', name: 'Analytics Database', type: 'database', domain: 'data', team: 'data', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'ClickHouse 22', deploymentStatus: 'deployed' },
-    { id: 'search-index', name: 'Search Index', type: 'database', domain: 'data', team: 'data', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'Elasticsearch 8', deploymentStatus: 'deployed' },
-    { id: 'file-storage', name: 'File Storage', type: 'database', domain: 'data', team: 'data', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'S3 Compatible', deploymentStatus: 'deployed' },
-    { id: 'redis-cache', name: 'Redis Cache', type: 'database', domain: 'data', team: 'data', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'Redis 7', deploymentStatus: 'deployed' },
-    { id: 'message-queue', name: 'Message Queue', type: 'database', domain: 'data', team: 'data', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'RabbitMQ 3.11', deploymentStatus: 'deployed' },
-    { id: 'event-store', name: 'Event Store', type: 'database', domain: 'data', team: 'data', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'EventStore 22', deploymentStatus: 'deployed' },
+    { id: 'mariadb-primary', name: 'MariaDB Primary', type: 'data', domain: 'data', team: 'data-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'MariaDB 10.11', deploymentStatus: 'deployed', description: 'Primary database for Wikipedia content and metadata' },
+    { id: 'mariadb-replica', name: 'MariaDB Replica', type: 'data', domain: 'data', team: 'data-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'MariaDB 10.11', deploymentStatus: 'deployed', description: 'Read replicas for load distribution' },
+    { id: 'mariadb-analytics', name: 'MariaDB Analytics', type: 'data', domain: 'data', team: 'data-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'MariaDB 10.11', deploymentStatus: 'deployed', description: 'Analytics database for reporting and metrics' },
+    { id: 'elasticsearch-cluster', name: 'Elasticsearch Cluster', type: 'data', domain: 'data', team: 'data-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'Elasticsearch 8.x', deploymentStatus: 'deployed', description: 'Search index cluster for full-text search' },
+    { id: 'redis-cluster', name: 'Redis Cluster', type: 'data', domain: 'data', team: 'data-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'Redis 7.x', deploymentStatus: 'deployed', description: 'In-memory cache and session storage' },
+    { id: 'object-storage', name: 'Object Storage', type: 'data', domain: 'data', team: 'data-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'Swift/Ceph', deploymentStatus: 'deployed', description: 'Distributed storage for media files and backups' },
+    { id: 'backup-storage', name: 'Backup Storage', type: 'data', domain: 'data', team: 'data-team', product: 'mediawiki', businessUnit: 'Engineering', status: 'healthy', version: 'Swift', deploymentStatus: 'deployed', description: 'Long-term backup storage for disaster recovery' },
     
-    // Infrastructure
-    { id: 'load-balancer', name: 'Load Balancer', type: 'infrastructure', domain: 'infra', team: 'platform', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'HAProxy 2.6', deploymentStatus: 'deployed' },
-    { id: 'web-servers', name: 'Web Servers', type: 'infrastructure', domain: 'infra', team: 'platform', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'Nginx 1.24', deploymentStatus: 'deployed' },
-    { id: 'database-server', name: 'Database Server', type: 'infrastructure', domain: 'infra', team: 'platform', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'EC2 m5.large', deploymentStatus: 'deployed' },
-    { id: 'cache-server', name: 'Cache Server', type: 'infrastructure', domain: 'infra', team: 'platform', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'EC2 t3.medium', deploymentStatus: 'deployed' },
-    { id: 'queue-server', name: 'Queue Server', type: 'infrastructure', domain: 'infra', team: 'platform', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'EC2 t3.medium', deploymentStatus: 'deployed' },
-    { id: 'cdn', name: 'CDN', type: 'infrastructure', domain: 'infra', team: 'platform', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'CloudFront', deploymentStatus: 'deployed' },
-    { id: 'vpc', name: 'VPC', type: 'infrastructure', domain: 'infra', team: 'platform', product: 'bitbucket', businessUnit: 'Engineering', status: 'healthy', version: 'AWS VPC', deploymentStatus: 'deployed' },
-    
-    // Security
-    { id: 'waf', name: 'WAF', type: 'security', domain: 'security', team: 'security', product: 'jira', businessUnit: 'Security', status: 'healthy', version: 'AWS WAF', deploymentStatus: 'deployed' },
-    { id: 'vpn', name: 'VPN', type: 'security', domain: 'security', team: 'security', product: 'jira', businessUnit: 'Security', status: 'healthy', version: 'OpenVPN', deploymentStatus: 'deployed' },
-    { id: 'key-management', name: 'Key Management', type: 'security', domain: 'security', team: 'security', product: 'jira', businessUnit: 'Security', status: 'healthy', version: 'AWS KMS', deploymentStatus: 'deployed' },
-    
-    // Observability
-    { id: 'monitoring', name: 'Monitoring', type: 'observability', domain: 'observability', team: 'sre', product: 'confluence', businessUnit: 'Operations', status: 'healthy', version: 'Prometheus 2.45', deploymentStatus: 'deployed' },
-    { id: 'logging', name: 'Logging', type: 'observability', domain: 'observability', team: 'sre', product: 'confluence', businessUnit: 'Operations', status: 'healthy', version: 'ELK Stack', deploymentStatus: 'deployed' },
-    { id: 'alerting', name: 'Alerting', type: 'observability', domain: 'observability', team: 'sre', product: 'confluence', businessUnit: 'Operations', status: 'healthy', version: 'AlertManager', deploymentStatus: 'deployed' },
-    { id: 'tracing', name: 'Tracing', type: 'observability', domain: 'observability', team: 'sre', product: 'confluence', businessUnit: 'Operations', status: 'healthy', version: 'Jaeger', deploymentStatus: 'deployed' },
-    { id: 'metrics-db', name: 'Metrics Database', type: 'observability', domain: 'observability', team: 'sre', product: 'confluence', businessUnit: 'Operations', status: 'healthy', version: 'InfluxDB 2.7', deploymentStatus: 'deployed' }
+    // Infrastructure Layer
+    { id: 'varnish-cache', name: 'Varnish Cache', type: 'infrastructure', domain: 'infrastructure', team: 'infra-team', product: 'mediawiki', businessUnit: 'Operations', status: 'healthy', version: 'Varnish 7.x', deploymentStatus: 'deployed', description: 'HTTP accelerator and reverse proxy cache' },
+    { id: 'load-balancer', name: 'Load Balancer', type: 'infrastructure', domain: 'infrastructure', team: 'infra-team', product: 'mediawiki', businessUnit: 'Operations', status: 'healthy', version: 'HAProxy', deploymentStatus: 'deployed', description: 'Traffic distribution across application servers' },
+    { id: 'app-servers', name: 'App Servers', type: 'infrastructure', domain: 'infrastructure', team: 'infra-team', product: 'mediawiki', businessUnit: 'Operations', status: 'healthy', version: 'PHP-FPM', deploymentStatus: 'deployed', description: 'Application servers running MediaWiki' },
+    { id: 'database-servers', name: 'Database Servers', type: 'infrastructure', domain: 'infrastructure', team: 'infra-team', product: 'mediawiki', businessUnit: 'Operations', status: 'healthy', version: 'Bare Metal', deploymentStatus: 'deployed', description: 'Dedicated servers for MariaDB databases' },
+    { id: 'search-servers', name: 'Search Servers', type: 'infrastructure', domain: 'infrastructure', team: 'infra-team', product: 'mediawiki', businessUnit: 'Operations', status: 'healthy', version: 'Bare Metal', deploymentStatus: 'deployed', description: 'Dedicated servers for Elasticsearch' },
+    { id: 'cache-servers', name: 'Cache Servers', type: 'infrastructure', domain: 'infrastructure', team: 'infra-team', product: 'mediawiki', businessUnit: 'Operations', status: 'healthy', version: 'Bare Metal', deploymentStatus: 'deployed', description: 'Dedicated servers for Redis caching' },
+    { id: 'cdn', name: 'CDN', type: 'infrastructure', domain: 'infrastructure', team: 'infra-team', product: 'mediawiki', businessUnit: 'Operations', status: 'healthy', version: 'CloudFlare', deploymentStatus: 'deployed', description: 'Content delivery network for global performance' },
+    { id: 'dns', name: 'DNS', type: 'infrastructure', domain: 'infrastructure', team: 'infra-team', product: 'mediawiki', businessUnit: 'Operations', status: 'healthy', version: 'BIND', deploymentStatus: 'deployed', description: 'Domain name system for Wikipedia domains' },
+    { id: 'puppet-master', name: 'Puppet Master', type: 'infrastructure', domain: 'infrastructure', team: 'infra-team', product: 'mediawiki', businessUnit: 'Operations', status: 'healthy', version: 'Puppet', deploymentStatus: 'deployed', description: 'Configuration management for infrastructure' },
+    { id: 'monitoring', name: 'Monitoring', type: 'infrastructure', domain: 'infrastructure', team: 'infra-team', product: 'mediawiki', businessUnit: 'Operations', status: 'healthy', version: 'Prometheus', deploymentStatus: 'deployed', description: 'System monitoring and alerting' },
+    { id: 'logging', name: 'Logging', type: 'infrastructure', domain: 'infrastructure', team: 'infra-team', product: 'mediawiki', businessUnit: 'Operations', status: 'healthy', version: 'ELK Stack', deploymentStatus: 'deployed', description: 'Centralized logging and log analysis' },
+    { id: 'ci-cd', name: 'CI/CD', type: 'infrastructure', domain: 'infrastructure', team: 'infra-team', product: 'mediawiki', businessUnit: 'Operations', status: 'healthy', version: 'Jenkins', deploymentStatus: 'deployed', description: 'Continuous integration and deployment pipeline' }
   ],
   links: [
-    // UI to API Gateway connections
-    { id: 'frontend-api', source: 'frontend-app', target: 'api-gateway', type: 'horizontal', strength: 0.9, status: 'healthy' },
-    { id: 'mobile-api', source: 'mobile-app', target: 'api-gateway', type: 'horizontal', strength: 0.9, status: 'healthy' },
-    { id: 'admin-api', source: 'admin-panel', target: 'api-gateway', type: 'horizontal', strength: 0.8, status: 'healthy' },
+    // Frontend to Application Layer (Vertical dependencies)
+    { id: 'web-mediawiki', source: 'wikipedia-web', target: 'mediawiki-core', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'mobile-web-mediawiki', source: 'mobile-web', target: 'mediawiki-core', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'app-mediawiki', source: 'wikipedia-app', target: 'mediawiki-core', type: 'vertical', strength: 0.8, status: 'healthy' },
+    { id: 'skin-mediawiki', source: 'vector-skin', target: 'mediawiki-core', type: 'vertical', strength: 0.7, status: 'healthy' },
     
-    // API Gateway to Services (vertical dependencies)
-    { id: 'gateway-user', source: 'api-gateway', target: 'user-service', type: 'vertical', strength: 0.8, status: 'healthy' },
-    { id: 'gateway-auth', source: 'api-gateway', target: 'auth-service', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'gateway-payment', source: 'api-gateway', target: 'payment-service', type: 'vertical', strength: 0.8, status: 'healthy' },
-    { id: 'gateway-notification', source: 'api-gateway', target: 'notification-service', type: 'vertical', strength: 0.7, status: 'healthy' },
-    { id: 'gateway-analytics', source: 'api-gateway', target: 'analytics-service', type: 'vertical', strength: 0.6, status: 'healthy' },
-    { id: 'gateway-search', source: 'api-gateway', target: 'search-service', type: 'vertical', strength: 0.7, status: 'healthy' },
-    { id: 'gateway-file', source: 'api-gateway', target: 'file-service', type: 'vertical', strength: 0.6, status: 'healthy' },
-    { id: 'gateway-email', source: 'api-gateway', target: 'email-service', type: 'vertical', strength: 0.5, status: 'healthy' },
+    // Frontend to API Layer (Horizontal dependencies)
+    { id: 'web-restbase', source: 'wikipedia-web', target: 'restbase', type: 'horizontal', strength: 0.8, status: 'healthy' },
+    { id: 'mobile-web-restbase', source: 'mobile-web', target: 'restbase', type: 'horizontal', strength: 0.8, status: 'healthy' },
+    { id: 'app-mobile-api', source: 'wikipedia-app', target: 'mobile-api', type: 'horizontal', strength: 0.9, status: 'healthy' },
+    { id: 'app-graphql', source: 'wikipedia-app', target: 'graphql-api', type: 'horizontal', strength: 0.7, status: 'healthy' },
     
-    // Service to Service dependencies (horizontal)
-    { id: 'user-auth', source: 'user-service', target: 'auth-service', type: 'horizontal', strength: 0.8, status: 'healthy' },
-    { id: 'payment-auth', source: 'payment-service', target: 'auth-service', type: 'horizontal', strength: 0.9, status: 'healthy' },
-    { id: 'notification-user', source: 'notification-service', target: 'user-service', type: 'horizontal', strength: 0.7, status: 'healthy' },
-    { id: 'analytics-user', source: 'analytics-service', target: 'user-service', type: 'horizontal', strength: 0.6, status: 'healthy' },
-    { id: 'search-file', source: 'search-service', target: 'file-service', type: 'horizontal', strength: 0.5, status: 'healthy' },
-    { id: 'email-notification', source: 'email-service', target: 'notification-service', type: 'horizontal', strength: 0.6, status: 'healthy' },
+    // Application Layer internal dependencies (Horizontal)
+    { id: 'core-parser', source: 'mediawiki-core', target: 'parser', type: 'horizontal', strength: 0.9, status: 'healthy' },
+    { id: 'core-extensions', source: 'mediawiki-core', target: 'extension-manager', type: 'horizontal', strength: 0.8, status: 'healthy' },
+    { id: 'core-users', source: 'mediawiki-core', target: 'user-management', type: 'horizontal', strength: 0.8, status: 'healthy' },
+    { id: 'core-content', source: 'mediawiki-core', target: 'content-management', type: 'horizontal', strength: 0.9, status: 'healthy' },
+    { id: 'core-files', source: 'mediawiki-core', target: 'file-upload', type: 'horizontal', strength: 0.7, status: 'healthy' },
+    { id: 'content-files', source: 'content-management', target: 'file-upload', type: 'horizontal', strength: 0.6, status: 'healthy' },
     
-    // Services to Databases (vertical)
-    { id: 'user-db-link', source: 'user-service', target: 'user-db', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'payment-db-link', source: 'payment-service', target: 'payment-db', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'analytics-db-link', source: 'analytics-service', target: 'analytics-db', type: 'vertical', strength: 0.8, status: 'healthy' },
-    { id: 'search-index-link', source: 'search-service', target: 'search-index', type: 'vertical', strength: 0.8, status: 'healthy' },
-    { id: 'file-storage-link', source: 'file-service', target: 'file-storage', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'redis-cache-link', source: 'user-service', target: 'redis-cache', type: 'vertical', strength: 0.7, status: 'healthy' },
-    { id: 'redis-cache-payment', source: 'payment-service', target: 'redis-cache', type: 'vertical', strength: 0.7, status: 'healthy' },
-    { id: 'message-queue-notification', source: 'notification-service', target: 'message-queue', type: 'vertical', strength: 0.8, status: 'healthy' },
-    { id: 'message-queue-email', source: 'email-service', target: 'message-queue', type: 'vertical', strength: 0.8, status: 'healthy' },
-    { id: 'event-store-analytics', source: 'analytics-service', target: 'event-store', type: 'vertical', strength: 0.7, status: 'healthy' },
-    { id: 'event-store-payment', source: 'payment-service', target: 'event-store', type: 'vertical', strength: 0.6, status: 'healthy' },
+    // Application to API Layer (Horizontal)
+    { id: 'mediawiki-action-api', source: 'mediawiki-core', target: 'action-api', type: 'horizontal', strength: 0.8, status: 'healthy' },
+    { id: 'restbase-action-api', source: 'restbase', target: 'action-api', type: 'horizontal', strength: 0.7, status: 'healthy' },
+    { id: 'graphql-action-api', source: 'graphql-api', target: 'action-api', type: 'horizontal', strength: 0.6, status: 'healthy' },
     
-    // Infrastructure dependencies
-    { id: 'load-balancer-web', source: 'load-balancer', target: 'web-servers', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'web-servers-api', source: 'web-servers', target: 'api-gateway', type: 'vertical', strength: 0.8, status: 'healthy' },
-    { id: 'database-server-user', source: 'database-server', target: 'user-db', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'database-server-payment', source: 'database-server', target: 'payment-db', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'cache-server-redis', source: 'cache-server', target: 'redis-cache', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'queue-server-message', source: 'queue-server', target: 'message-queue', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'cdn-frontend', source: 'cdn', target: 'frontend-app', type: 'vertical', strength: 0.8, status: 'healthy' },
-    { id: 'vpc-load-balancer', source: 'vpc', target: 'load-balancer', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'vpc-database', source: 'vpc', target: 'database-server', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'vpc-cache', source: 'vpc', target: 'cache-server', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'vpc-queue', source: 'vpc', target: 'queue-server', type: 'vertical', strength: 0.9, status: 'healthy' },
+    // Application to Services (Horizontal)
+    { id: 'mediawiki-job-queue', source: 'mediawiki-core', target: 'job-queue', type: 'horizontal', strength: 0.7, status: 'healthy' },
+    { id: 'mediawiki-search', source: 'mediawiki-core', target: 'search-service', type: 'horizontal', strength: 0.8, status: 'healthy' },
+    { id: 'mediawiki-cache', source: 'mediawiki-core', target: 'cache-service', type: 'horizontal', strength: 0.8, status: 'healthy' },
+    { id: 'mediawiki-notifications', source: 'mediawiki-core', target: 'notification-service', type: 'horizontal', strength: 0.6, status: 'healthy' },
+    { id: 'mediawiki-email', source: 'mediawiki-core', target: 'email-service', type: 'horizontal', strength: 0.6, status: 'healthy' },
+    { id: 'mediawiki-analytics', source: 'mediawiki-core', target: 'analytics-service', type: 'horizontal', strength: 0.5, status: 'healthy' },
+    { id: 'user-management-email', source: 'user-management', target: 'email-service', type: 'horizontal', strength: 0.7, status: 'healthy' },
+    { id: 'user-management-notifications', source: 'user-management', target: 'notification-service', type: 'horizontal', strength: 0.7, status: 'healthy' },
     
-    // Security dependencies
-    { id: 'waf-load-balancer', source: 'waf', target: 'load-balancer', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'vpn-vpc', source: 'vpn', target: 'vpc', type: 'vertical', strength: 0.8, status: 'healthy' },
-    { id: 'key-management-payment', source: 'key-management', target: 'payment-service', type: 'vertical', strength: 0.7, status: 'healthy' },
-    { id: 'key-management-auth', source: 'key-management', target: 'auth-service', type: 'vertical', strength: 0.8, status: 'healthy' },
+    // Services to Data Layer (Vertical)
+    { id: 'job-queue-redis', source: 'job-queue', target: 'redis-cluster', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'search-service-elasticsearch', source: 'search-service', target: 'elasticsearch-cluster', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'cache-service-redis', source: 'cache-service', target: 'redis-cluster', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'notification-service-redis', source: 'notification-service', target: 'redis-cluster', type: 'vertical', strength: 0.7, status: 'healthy' },
+    { id: 'analytics-service-mariadb', source: 'analytics-service', target: 'mariadb-analytics', type: 'vertical', strength: 0.8, status: 'healthy' },
     
-    // Observability dependencies
-    { id: 'monitoring-api', source: 'monitoring', target: 'api-gateway', type: 'vertical', strength: 0.6, status: 'healthy' },
-    { id: 'monitoring-user', source: 'monitoring', target: 'user-service', type: 'vertical', strength: 0.6, status: 'healthy' },
-    { id: 'monitoring-payment', source: 'monitoring', target: 'payment-service', type: 'vertical', strength: 0.6, status: 'healthy' },
-    { id: 'logging-api', source: 'logging', target: 'api-gateway', type: 'vertical', strength: 0.7, status: 'healthy' },
-    { id: 'logging-user', source: 'logging', target: 'user-service', type: 'vertical', strength: 0.7, status: 'healthy' },
-    { id: 'logging-payment', source: 'logging', target: 'payment-service', type: 'vertical', strength: 0.7, status: 'healthy' },
-    { id: 'alerting-monitoring', source: 'alerting', target: 'monitoring', type: 'vertical', strength: 0.8, status: 'healthy' },
-    { id: 'tracing-api', source: 'tracing', target: 'api-gateway', type: 'vertical', strength: 0.5, status: 'healthy' },
-    { id: 'tracing-user', source: 'tracing', target: 'user-service', type: 'vertical', strength: 0.5, status: 'healthy' },
-    { id: 'tracing-payment', source: 'tracing', target: 'payment-service', type: 'vertical', strength: 0.5, status: 'healthy' },
-    { id: 'metrics-db-monitoring', source: 'metrics-db', target: 'monitoring', type: 'vertical', strength: 0.9, status: 'healthy' },
-    { id: 'metrics-db-logging', source: 'metrics-db', target: 'logging', type: 'vertical', strength: 0.8, status: 'healthy' }
+    // Application to Data Layer (Vertical)
+    { id: 'mediawiki-mariadb-primary', source: 'mediawiki-core', target: 'mariadb-primary', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'mediawiki-mariadb-replica', source: 'mediawiki-core', target: 'mariadb-replica', type: 'vertical', strength: 0.7, status: 'healthy' },
+    { id: 'content-management-object-storage', source: 'content-management', target: 'object-storage', type: 'vertical', strength: 0.6, status: 'healthy' },
+    { id: 'file-upload-object-storage', source: 'file-upload', target: 'object-storage', type: 'vertical', strength: 0.8, status: 'healthy' },
+    
+    // Infrastructure dependencies (Vertical)
+    { id: 'varnish-load-balancer', source: 'varnish-cache', target: 'load-balancer', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'load-balancer-app-servers', source: 'load-balancer', target: 'app-servers', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'app-servers-mediawiki', source: 'app-servers', target: 'mediawiki-core', type: 'vertical', strength: 0.8, status: 'healthy' },
+    { id: 'database-servers-mariadb-primary', source: 'database-servers', target: 'mariadb-primary', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'database-servers-mariadb-replica', source: 'database-servers', target: 'mariadb-replica', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'database-servers-mariadb-analytics', source: 'database-servers', target: 'mariadb-analytics', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'search-servers-elasticsearch', source: 'search-servers', target: 'elasticsearch-cluster', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'cache-servers-redis', source: 'cache-servers', target: 'redis-cluster', type: 'vertical', strength: 0.9, status: 'healthy' },
+    { id: 'cdn-varnish', source: 'cdn', target: 'varnish-cache', type: 'vertical', strength: 0.8, status: 'healthy' },
+    { id: 'dns-cdn', source: 'dns', target: 'cdn', type: 'vertical', strength: 0.7, status: 'healthy' },
+    
+    // Infrastructure management dependencies
+    { id: 'puppet-app-servers', source: 'puppet-master', target: 'app-servers', type: 'vertical', strength: 0.6, status: 'healthy' },
+    { id: 'puppet-database-servers', source: 'puppet-master', target: 'database-servers', type: 'vertical', strength: 0.6, status: 'healthy' },
+    { id: 'puppet-search-servers', source: 'puppet-master', target: 'search-servers', type: 'vertical', strength: 0.6, status: 'healthy' },
+    { id: 'puppet-cache-servers', source: 'puppet-master', target: 'cache-servers', type: 'vertical', strength: 0.6, status: 'healthy' },
+    
+    // Monitoring and observability
+    { id: 'monitoring-app-servers', source: 'monitoring', target: 'app-servers', type: 'vertical', strength: 0.5, status: 'healthy' },
+    { id: 'monitoring-database-servers', source: 'monitoring', target: 'database-servers', type: 'vertical', strength: 0.5, status: 'healthy' },
+    { id: 'monitoring-search-servers', source: 'monitoring', target: 'search-servers', type: 'vertical', strength: 0.5, status: 'healthy' },
+    { id: 'monitoring-cache-servers', source: 'monitoring', target: 'cache-servers', type: 'vertical', strength: 0.5, status: 'healthy' },
+    { id: 'logging-app-servers', source: 'logging', target: 'app-servers', type: 'vertical', strength: 0.6, status: 'healthy' },
+    { id: 'logging-database-servers', source: 'logging', target: 'database-servers', type: 'vertical', strength: 0.6, status: 'healthy' },
+    { id: 'logging-search-servers', source: 'logging', target: 'search-servers', type: 'vertical', strength: 0.6, status: 'healthy' },
+    { id: 'logging-cache-servers', source: 'logging', target: 'cache-servers', type: 'vertical', strength: 0.6, status: 'healthy' },
+    
+    // CI/CD dependencies
+    { id: 'ci-cd-app-servers', source: 'ci-cd', target: 'app-servers', type: 'vertical', strength: 0.5, status: 'healthy' },
+    { id: 'ci-cd-puppet', source: 'ci-cd', target: 'puppet-master', type: 'vertical', strength: 0.6, status: 'healthy' }
   ]
 };
 
 export const sampleBlastRadius: BlastRadius = {
-  sourceNodeId: 'payment-db',
+  sourceNodeId: 'mariadb-primary',
   directIssues: {
-    nodes: ['payment-db', 'payment-service', 'api-gateway'],
-    links: ['payment-db-link', 'gateway-payment']
+    nodes: ['mariadb-primary', 'mediawiki-core', 'content-management', 'user-management'],
+    links: ['mediawiki-mariadb-primary', 'core-content', 'core-users']
   },
   potentialIssues: {
-    nodes: ['frontend-app', 'mobile-app', 'admin-panel', 'user-service', 'auth-service', 'notification-service', 'analytics-service', 'email-service', 'user-db', 'redis-cache', 'message-queue', 'event-store', 'database-server', 'cache-server', 'queue-server', 'load-balancer', 'web-servers', 'vpc', 'monitoring', 'logging', 'alerting', 'tracing', 'metrics-db'],
-    links: ['payment-auth', 'frontend-api', 'mobile-api', 'admin-api', 'user-auth', 'notification-user', 'analytics-user', 'email-notification', 'redis-cache-payment', 'event-store-payment', 'database-server-payment', 'cache-server-redis', 'queue-server-message', 'load-balancer-web', 'web-servers-api', 'vpc-load-balancer', 'vpc-database', 'vpc-cache', 'vpc-queue', 'monitoring-payment', 'logging-payment', 'tracing-payment', 'metrics-db-monitoring', 'metrics-db-logging']
+    nodes: ['wikipedia-web', 'mobile-web', 'wikipedia-app', 'restbase', 'action-api', 'job-queue', 'search-service', 'cache-service', 'notification-service', 'email-service', 'analytics-service', 'mariadb-replica', 'elasticsearch-cluster', 'redis-cluster', 'object-storage', 'varnish-cache', 'load-balancer', 'app-servers', 'database-servers', 'monitoring', 'logging'],
+    links: ['web-mediawiki', 'mobile-web-mediawiki', 'app-mediawiki', 'web-restbase', 'mobile-web-restbase', 'mediawiki-action-api', 'restbase-action-api', 'mediawiki-job-queue', 'mediawiki-search', 'mediawiki-cache', 'mediawiki-notifications', 'mediawiki-email', 'mediawiki-analytics', 'job-queue-redis', 'search-service-elasticsearch', 'cache-service-redis', 'notification-service-redis', 'analytics-service-mariadb', 'mediawiki-mariadb-replica', 'varnish-load-balancer', 'load-balancer-app-servers', 'app-servers-mediawiki', 'database-servers-mariadb-primary', 'database-servers-mariadb-replica', 'database-servers-mariadb-analytics', 'search-servers-elasticsearch', 'cache-servers-redis', 'cdn-varnish', 'monitoring-database-servers', 'logging-database-servers']
   },
   severity: 'critical',
-  description: 'Payment database failure causing cascading impact across payment processing, user authentication, and notification systems'
+  description: 'Primary MariaDB database failure causing cascading impact across Wikipedia editing, content management, and user authentication systems'
 }; 
