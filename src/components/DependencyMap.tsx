@@ -311,21 +311,23 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
     const warningIconBg = '#FFFFFF';
     const warningIconBorder = '#FF5630';
 
-    // Create force simulation with better spacing like Port.io demo
+    // Create force simulation with much better spacing to accommodate curved lines
     const simulation = d3.forceSimulation<DependencyNode>(filteredNodes)
-      .force('link', d3.forceLink<DependencyNode, DependencyLink>(filteredLinks).id((d: DependencyNode) => d.id).distance(150))
-      .force('charge', d3.forceManyBody().strength(-500))
+      .force('link', d3.forceLink<DependencyNode, DependencyLink>(filteredLinks).id((d: DependencyNode) => d.id).distance(250)) // Increased distance
+      .force('charge', d3.forceManyBody().strength(-800)) // Stronger repulsion
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(80))
+      .force('collision', d3.forceCollide().radius(120)) // Larger collision radius for more space
       .alphaDecay(0.05) // Slower stabilization for better layout
       .velocityDecay(0.3); // Less damping for more natural movement
 
     simulationRef.current = simulation;
 
-    // Define arrow marker for vertical dependencies
+    // Define arrow markers for different dependency types
     const defs = svg.append('defs');
+    
+    // Vertical dependency arrow (pink)
     defs.append('marker')
-      .attr('id', 'arrowhead')
+      .attr('id', 'arrowhead-vertical')
       .attr('viewBox', '0 -5 10 10')
       .attr('refX', 15)
       .attr('refY', 0)
@@ -335,6 +337,32 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
       .append('path')
       .attr('d', 'M0,-5L10,0L0,5')
       .attr('fill', '#FF69B4');
+    
+    // Horizontal dependency arrow (green)
+    defs.append('marker')
+      .attr('id', 'arrowhead-horizontal')
+      .attr('viewBox', '0 -5 10 10')
+      .attr('refX', 15)
+      .attr('refY', 0)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('path')
+      .attr('d', 'M0,-5L10,0L0,5')
+      .attr('fill', '#36B37E');
+    
+    // Blast radius arrow (red)
+    defs.append('marker')
+      .attr('id', 'arrowhead-blast')
+      .attr('viewBox', '0 -5 10 10')
+      .attr('refX', 15)
+      .attr('refY', 0)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('path')
+      .attr('d', 'M0,-5L10,0L0,5')
+      .attr('fill', '#FF5630');
 
     // Create curved links
     const links = g.append('g')
@@ -363,11 +391,11 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         if (filterState.showBlastRadius && filterState.blastRadiusData) {
           if (filterState.blastRadiusData.directIssues.links.includes(d.id) || 
               filterState.blastRadiusData.potentialIssues.links.includes(d.id)) {
-            return '2';
+            return 2;
           }
         }
         // Thicker lines for vertical dependencies
-        return d.type === 'vertical' ? '2' : '1';
+        return d.type === 'vertical' ? 2 : 1;
       })
       .attr('stroke-opacity', (d: any) => {
         if (filterState.showBlastRadius && filterState.blastRadiusData) {
@@ -384,8 +412,19 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         return d.type === 'horizontal' ? '5,5' : null;
       })
       .attr('marker-end', (d: any) => {
-        // Add arrow head only for vertical dependencies
-        return d.type === 'vertical' ? 'url(#arrowhead)' : null;
+        if (filterState.showBlastRadius && filterState.blastRadiusData) {
+          if (filterState.blastRadiusData.directIssues.links.includes(d.id) || 
+              filterState.blastRadiusData.potentialIssues.links.includes(d.id)) {
+            return 'url(#arrowhead-blast)';
+          }
+        }
+        // Add appropriate arrow head based on dependency type
+        if (d.type === 'vertical') {
+          return 'url(#arrowhead-vertical)';
+        } else if (d.type === 'horizontal') {
+          return 'url(#arrowhead-horizontal)';
+        }
+        return null;
       });
 
     // Create nodes with drag behavior like Port.io demo
@@ -491,10 +530,10 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         if (filterState.showBlastRadius && filterState.blastRadiusData) {
           if (filterState.blastRadiusData.directIssues.nodes.includes(d.id) || 
               filterState.blastRadiusData.potentialIssues.nodes.includes(d.id)) {
-            return '3';
+            return 3;
           }
         }
-        return '1';
+        return 1;
       })
       .attr('opacity', (d: any): number => {
         if (filterState.showBlastRadius && filterState.blastRadiusData) {
@@ -522,7 +561,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
       .attr('r', 8)
       .attr('fill', warningIconBg)
       .attr('stroke', warningIconBorder)
-      .attr('stroke-width', '1');
+      .attr('stroke-width', 1);
 
     // Add incident source icon for the primary incident node
     nodes.filter((d: any) => {
@@ -590,19 +629,110 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         return 1;
       });
 
+    // Helper function to check if a point is inside a node's bounding box
+    const isPointInNode = (x: number, y: number, node: any, padding = 20) => {
+      const nodeWidth = Math.max(140, node.name.length * 10);
+      const nodeHeight = 50;
+      const left = node.x - nodeWidth / 2 - padding;
+      const right = node.x + nodeWidth / 2 + padding;
+      const top = node.y - nodeHeight / 2 - padding;
+      const bottom = node.y + nodeHeight / 2 + padding;
+      
+      return x >= left && x <= right && y >= top && y <= bottom;
+    };
+
+    // Helper function to find the best path around obstacles
+    const findPathAroundNodes = (source: any, target: any, allNodes: any[]) => {
+      const sx = source.x;
+      const sy = source.y;
+      const tx = target.x;
+      const ty = target.y;
+      
+      // Calculate direct distance
+      const directDistance = Math.sqrt((tx - sx) ** 2 + (ty - sy) ** 2);
+      
+      // If nodes are very close or no obstacles, use a simple curved path
+      if (directDistance < 100) {
+        const midX = (sx + tx) / 2;
+        const midY = (sy + ty) / 2;
+        const offset = Math.min(directDistance * 0.2, 30);
+        return `M${sx},${sy} Q${midX},${midY - offset} ${tx},${ty}`;
+      }
+      
+      // Find potential waypoints to route around obstacles
+      
+      // Check for nodes that might be in the path
+      const obstructingNodes = allNodes.filter(node => 
+        node.id !== source.id && node.id !== target.id &&
+        isPointInNode((sx + tx) / 2, (sy + ty) / 2, node, 40)
+      );
+      
+      if (obstructingNodes.length === 0) {
+        // No obstacles, use a gentle curve
+        const midX = (sx + tx) / 2;
+        const midY = (sy + ty) / 2;
+        const perpX = -(ty - sy) / directDistance;
+        const perpY = (tx - sx) / directDistance;
+        const curveDistance = Math.min(directDistance * 0.15, 60);
+        
+        const controlX = midX + perpX * curveDistance;
+        const controlY = midY + perpY * curveDistance;
+        
+        return `M${sx},${sy} Q${controlX},${controlY} ${tx},${ty}`;
+      }
+      
+      // Route around obstacles
+      const mainObstacle = obstructingNodes[0];
+      const nodeWidth = Math.max(140, mainObstacle.name.length * 10);
+      const nodeHeight = 50;
+      const padding = 40;
+      
+      // Determine which side to route around based on relative positions
+      const dx = tx - sx;
+      const dy = ty - sy;
+      const obstacleRelX = mainObstacle.x - sx;
+      const obstacleRelY = mainObstacle.y - sy;
+      
+      // Calculate waypoints around the obstacle
+      let waypointX, waypointY;
+      
+      if (Math.abs(dx) > Math.abs(dy)) {
+        // Horizontal routing - go around top or bottom
+        if (obstacleRelY > 0) {
+          // Go around the top
+          waypointX = mainObstacle.x;
+          waypointY = mainObstacle.y - nodeHeight / 2 - padding;
+        } else {
+          // Go around the bottom
+          waypointX = mainObstacle.x;
+          waypointY = mainObstacle.y + nodeHeight / 2 + padding;
+        }
+      } else {
+        // Vertical routing - go around left or right
+        if (obstacleRelX > 0) {
+          // Go around the left
+          waypointX = mainObstacle.x - nodeWidth / 2 - padding;
+          waypointY = mainObstacle.y;
+        } else {
+          // Go around the right
+          waypointX = mainObstacle.x + nodeWidth / 2 + padding;
+          waypointY = mainObstacle.y;
+        }
+      }
+      
+      // Create a smooth path through the waypoint
+      const midX1 = (sx + waypointX) / 2;
+      const midY1 = (sy + waypointY) / 2;
+      const midX2 = (waypointX + tx) / 2;
+      const midY2 = (waypointY + ty) / 2;
+      
+      return `M${sx},${sy} Q${midX1},${midY1} ${waypointX},${waypointY} Q${midX2},${midY2} ${tx},${ty}`;
+    };
+
     // Update positions on simulation tick
     simulation.on('tick', () => {
       links.attr('d', (d: any) => {
-        const dx = d.target.x - d.source.x;
-        const dy = d.target.y - d.source.y;
-        const dr = Math.sqrt(dx * dx + dy * dy);
-        
-        // Create curved path with control points
-        const midX = (d.source.x + d.target.x) / 2;
-        const midY = (d.source.y + d.target.y) / 2;
-        const curveOffset = Math.min(dr * 0.3, 50); // Curvature based on distance
-        
-        return `M${d.source.x},${d.source.y} Q${midX},${midY - curveOffset} ${d.target.x},${d.target.y}`;
+        return findPathAroundNodes(d.source, d.target, filteredNodes);
       });
 
       nodes.attr('transform', (d: any) => `translate(${d.x - Math.max(140, d.name.length * 10) / 2},${d.y - 25})`);
@@ -686,12 +816,12 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
     return {
       sourceNodeId: incidentSource,
       directIssues: {
-        nodes: Array.from(directlyAffected),
-        links: Array.from(affectedLinks).slice(0, 10) // Limit for performance
+        nodes: Array.from(directlyAffected) as string[],
+        links: Array.from(affectedLinks).slice(0, 10) as string[] // Limit for performance
       },
       potentialIssues: {
-        nodes: Array.from(potentiallyAffected),
-        links: Array.from(affectedLinks).slice(10, 20) // Additional affected links
+        nodes: Array.from(potentiallyAffected) as string[],
+        links: Array.from(affectedLinks).slice(10, 20) as string[] // Additional affected links
       },
       severity: 'critical' as const,
       description: 'Primary database failure causing cascading service outages across Wikipedia infrastructure. Multiple frontend and API services experiencing degraded performance or complete outages.'
@@ -1261,37 +1391,171 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         />
       )}
 
-      {filterState.showBlastRadius && filterState.blastRadiusData && (
-        <div style={{
-          position: 'absolute',
-          top: '80px',
-          right: '20px',
-          background: token('color.background.neutral'),
-          border: '1px solid',
-          borderColor: token('color.border'),
-          borderRadius: token('border.radius.300'),
-          padding: token('space.200'),
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-          maxWidth: '300px',
-          zIndex: 1000
-        }}>
+      {filterState.showBlastRadius && filterState.blastRadiusData && (() => {
+        // Get the source node and all affected nodes
+        const blastData = filterState.blastRadiusData;
+        if (!blastData) return null;
+        
+        const sourceNode = filteredNodes.find(node => node.id === blastData.sourceNodeId);
+        const affectedNodes = filteredNodes.filter(node => 
+          blastData.directIssues.nodes.includes(node.id) ||
+          blastData.potentialIssues.nodes.includes(node.id)
+        );
+        
+        // Collect all unique owners from affected services
+        const allOwners = new Set();
+        
+        // Add source node owners
+        if (sourceNode) {
+          const sourceDomain = data.domains.find(d => d.id === sourceNode.domain);
+          const sourceTeam = data.teams.find(t => t.id === sourceNode.team);
+          const sourceProduct = data.products.find(p => p.id === sourceNode.product);
+          const sourceBusinessUnit = data.businessUnits.find(bu => bu.name === sourceNode.businessUnit);
+          
+          if (sourceDomain?.owner) allOwners.add(JSON.stringify({...sourceDomain.owner, role: 'Domain Owner', service: sourceNode.name}));
+          if (sourceTeam?.owner) allOwners.add(JSON.stringify({...sourceTeam.owner, role: 'Team Owner', service: sourceNode.name}));
+          if (sourceProduct?.owner) allOwners.add(JSON.stringify({...sourceProduct.owner, role: 'Product Owner', service: sourceNode.name}));
+          if (sourceBusinessUnit?.owner) allOwners.add(JSON.stringify({...sourceBusinessUnit.owner, role: 'Business Unit Owner', service: sourceNode.name}));
+        }
+        
+        // Add affected nodes owners
+        affectedNodes.forEach(node => {
+          const domain = data.domains.find(d => d.id === node.domain);
+          const team = data.teams.find(t => t.id === node.team);
+          const product = data.products.find(p => p.id === node.product);
+          const businessUnit = data.businessUnits.find(bu => bu.name === node.businessUnit);
+          
+          if (domain?.owner) allOwners.add(JSON.stringify({...domain.owner, role: 'Domain Owner', service: node.name}));
+          if (team?.owner) allOwners.add(JSON.stringify({...team.owner, role: 'Team Owner', service: node.name}));
+          if (product?.owner) allOwners.add(JSON.stringify({...product.owner, role: 'Product Owner', service: node.name}));
+          if (businessUnit?.owner) allOwners.add(JSON.stringify({...businessUnit.owner, role: 'Business Unit Owner', service: node.name}));
+        });
+        
+        // Convert back to objects and deduplicate by owner ID
+        const uniqueOwners = Array.from(allOwners)
+          .map((ownerStr: unknown) => JSON.parse(ownerStr as string))
+          .reduce((acc: any[], owner: any) => {
+            if (!acc.find((existing: any) => existing.id === owner.id)) {
+              acc.push(owner);
+            }
+            return acc;
+          }, []);
+        
+        // Separate on-call team (team owners of affected services)
+        const onCallTeam = uniqueOwners.filter((owner: any) => owner.role === 'Team Owner');
+        const otherOwners = uniqueOwners.filter((owner: any) => owner.role !== 'Team Owner');
+        
+        return (
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: token('space.100'),
-            marginBottom: token('space.100')
+            position: 'absolute',
+            top: '80px',
+            right: '20px',
+            background: token('color.background.neutral'),
+            border: '1px solid',
+            borderColor: token('color.border'),
+            borderRadius: token('border.radius.300'),
+            padding: token('space.200'),
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            maxWidth: '350px',
+            minWidth: '300px',
+            zIndex: 1000
           }}>
-            <WarningIcon label="Warning" primaryColor={token('color.icon.warning')} />
-            <Heading size="small">Active Incident</Heading>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: token('space.100'),
+              marginBottom: token('space.100')
+            }}>
+              <WarningIcon label="Warning" primaryColor={token('color.icon.warning')} />
+              <Heading size="small">Active Incident</Heading>
+            </div>
+            
+            <div style={{ marginBottom: token('space.150') }}>
+              <Text size="small" color="color.text.subtle">
+                {blastData.description}
+              </Text>
+            </div>
+            
+            <div style={{ marginBottom: token('space.150') }}>
+              <Lozenge appearance="default" isBold>
+                {blastData.severity.toUpperCase()}
+              </Lozenge>
+            </div>
+
+            {/* On-Call Team Section */}
+            {onCallTeam.length > 0 && (
+              <div style={{ marginBottom: token('space.150') }}>
+                <div style={{ marginBottom: token('space.050') }}>
+                  <Text size="small" weight="bold">
+                    On-Call Team ({onCallTeam.length})
+                  </Text>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {onCallTeam.slice(0, 3).map((owner: any, index: number) => (
+                    <div key={index} style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '6px',
+                      padding: '4px 6px',
+                      backgroundColor: token('color.background.selected'),
+                      borderRadius: '4px',
+                      fontSize: '11px'
+                    }}>
+                      <OwnerAvatar owner={owner} size={16} showTooltip={false} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{owner.name}</div>
+                        <div style={{ color: token('color.text.subtle'), fontSize: '10px' }}>
+                          {owner.service}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {onCallTeam.length > 3 && (
+                    <Text size="small" color="color.text.subtle">
+                      +{onCallTeam.length - 3} more team members
+                    </Text>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Other Relevant Owners */}
+            {otherOwners.length > 0 && (
+              <div>
+                <div style={{ marginBottom: token('space.050') }}>
+                  <Text size="small" weight="bold">
+                    Relevant Owners ({otherOwners.length})
+                  </Text>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {otherOwners.slice(0, 3).map((owner: any, index: number) => (
+                    <div key={index} style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '6px',
+                      padding: '2px 4px',
+                      fontSize: '11px'
+                    }}>
+                      <OwnerAvatar owner={owner} size={14} showTooltip={false} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ fontWeight: '500' }}>{owner.name}</span>
+                        <span style={{ color: token('color.text.subtle'), marginLeft: '4px' }}>
+                          ({owner.role})
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                  {otherOwners.length > 3 && (
+                    <Text size="small" color="color.text.subtle">
+                      +{otherOwners.length - 3} more owners
+                    </Text>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
-          <Text size="small" color="color.text.subtle">
-            {filterState.blastRadiusData.description}
-          </Text>
-          <Lozenge appearance="default" isBold>
-            {filterState.blastRadiusData.severity.toUpperCase()}
-          </Lozenge>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Node Detail Drawer */}
       <NodeDrawer isOpen={isDrawerOpen}>
