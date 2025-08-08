@@ -794,7 +794,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
     const potentiallyAffected = new Set();
     const affectedLinks = new Set();
     
-    // Find all services that directly depend on the primary database
+    // Find all services that directly depend on the primary database (where mariadb-primary is the target)
     const directDependents = data.links.filter(link => link.target === incidentSource);
     directDependents.forEach(link => {
       directlyAffected.add(link.source);
@@ -810,18 +810,36 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
       });
     });
     
+    // Add more cascade levels to show broader impact
+    potentiallyAffected.forEach(affectedNode => {
+      const cascadeDependents = data.links.filter(link => link.target === affectedNode);
+      cascadeDependents.forEach(link => {
+        if (!directlyAffected.has(link.source) && !potentiallyAffected.has(link.source)) {
+          potentiallyAffected.add(link.source);
+          affectedLinks.add(link.id);
+        }
+      });
+    });
+    
     // Add the source node to directly affected
     directlyAffected.add(incidentSource);
+    
+    console.log('Blast radius generated:', {
+      sourceNodeId: incidentSource,
+      directlyAffected: Array.from(directlyAffected),
+      potentiallyAffected: Array.from(potentiallyAffected),
+      affectedLinks: Array.from(affectedLinks)
+    });
     
     return {
       sourceNodeId: incidentSource,
       directIssues: {
         nodes: Array.from(directlyAffected) as string[],
-        links: Array.from(affectedLinks).slice(0, 10) as string[] // Limit for performance
+        links: Array.from(affectedLinks) as string[] // Include all affected links
       },
       potentialIssues: {
         nodes: Array.from(potentiallyAffected) as string[],
-        links: Array.from(affectedLinks).slice(10, 20) as string[] // Additional affected links
+        links: [] as string[] // Move all links to directIssues for red coloring
       },
       severity: 'critical' as const,
       description: 'Primary database failure causing cascading service outages across Wikipedia infrastructure. Multiple frontend and API services experiencing degraded performance or complete outages.'
