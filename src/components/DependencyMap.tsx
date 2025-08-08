@@ -132,8 +132,8 @@ const NodeTooltip = styled.div<{ isDarkMode: boolean }>`
 const NodeDrawer = styled.div<{ isOpen: boolean }>`
   position: fixed;
   top: 25px;
-  right: ${props => props.isOpen ? '24px' : '-424px'};
-  width: 400px;
+  right: ${props => props.isOpen ? '24px' : '-500px'};
+  width: 480px;
   height: calc(100vh - 50px);
   background: ${token('elevation.surface')};
   border: 1px solid ${token('color.border')};
@@ -1588,6 +1588,17 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
             </DrawerHeader>
 
             <DrawerSection>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                <Button size="small">
+                  Announcement
+                </Button>
+                <Button size="small">
+                  Notification
+                </Button>
+                <Button size="small" appearance="primary">
+                  Create work item
+                </Button>
+              </div>
               <DrawerSectionTitle>Description</DrawerSectionTitle>
               <DrawerContent>
                 {selectedNode.description || 'No description available'}
@@ -1687,6 +1698,174 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
                 <strong>Incoming:</strong> {filteredLinks.filter(link => link.target === selectedNode.id).length} connections<br/>
                 <strong>Outgoing:</strong> {filteredLinks.filter(link => link.source === selectedNode.id).length} connections<br/>
                 <strong>Total:</strong> {filteredLinks.filter(link => link.source === selectedNode.id || link.target === selectedNode.id).length} connections
+              </DrawerContent>
+            </DrawerSection>
+
+            <DrawerSection>
+              <DrawerSectionTitle>Activity</DrawerSectionTitle>
+              <DrawerContent>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {(() => {
+                    // Generate mock activity data for the last 30 days
+                    const activities = [
+                      {
+                        type: 'deployment',
+                        action: 'Version v2.1.3 deployed successfully',
+                        details: 'Build #1247 • Duration: 4m 32s • No rollbacks',
+                        user: 'CI/CD Pipeline',
+                        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+                        icon: '🚀',
+                        status: 'success'
+                      },
+                      {
+                        type: 'incident',
+                        action: 'High memory usage incident resolved',
+                        details: 'INC-2024-001 • Severity: P2 • Root cause: Memory leak in cache service',
+                        user: 'DevOps Team',
+                        timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+                        icon: '🚨',
+                        status: 'resolved'
+                      },
+                      {
+                        type: 'configuration',
+                        action: 'Database connection pool updated',
+                        details: 'Max connections: 50 → 75 • Timeout: 30s → 45s',
+                        user: 'Sarah Johnson',
+                        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+                        icon: '⚙️',
+                        status: 'completed'
+                      },
+                      {
+                        type: 'deployment',
+                        action: 'Hotfix v2.1.2 deployed',
+                        details: 'Build #1243 • Duration: 2m 18s • Emergency deployment',
+                        user: 'Emergency Release Team',
+                        timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+                        icon: '🔥',
+                        status: 'success'
+                      },
+                      {
+                        type: 'monitoring',
+                        action: 'Health check threshold modified',
+                        details: 'Response time alert: 500ms → 750ms • CPU threshold: 80% → 85%',
+                        user: 'Mike Wilson',
+                        timestamp: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8 days ago
+                        icon: '📊',
+                        status: 'active'
+                      },
+                      {
+                        type: 'incident',
+                        action: 'Database connection timeout incident',
+                        details: 'INC-2024-002 • Severity: P1 • Duration: 23 minutes • Auto-resolved',
+                        user: 'Monitoring System',
+                        timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
+                        icon: '⚠️',
+                        status: 'resolved'
+                      },
+                      {
+                        type: 'security',
+                        action: 'SSL certificate renewed',
+                        details: 'Expiry: 2025-01-15 • Algorithm: RSA 2048 • Auto-renewal enabled',
+                        user: 'Security System',
+                        timestamp: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000), // 12 days ago
+                        icon: '🔒',
+                        status: 'active'
+                      },
+                      {
+                        type: 'deployment',
+                        action: 'Version v2.1.1 rolled back',
+                        details: 'Build #1240 • Rollback reason: Critical bug in payment processing',
+                        user: 'Emergency Response Team',
+                        timestamp: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), // 14 days ago
+                        icon: '⏪',
+                        status: 'rollback'
+                      },
+                      {
+                        type: 'incident',
+                        action: 'Service unavailable incident resolved',
+                        details: 'INC-2024-003 • Severity: P0 • Duration: 45 minutes • Load balancer failure',
+                        user: 'Incident Response Team',
+                        timestamp: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000), // 18 days ago
+                        icon: '🔴',
+                        status: 'resolved'
+                      },
+                      {
+                        type: 'deployment',
+                        action: 'Version v2.1.0 deployed',
+                        details: 'Build #1235 • Duration: 6m 15s • Blue-green deployment',
+                        user: 'Release Team',
+                        timestamp: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000), // 21 days ago
+                        icon: '🚀',
+                        status: 'success'
+                      },
+                      {
+                        type: 'audit',
+                        action: 'Access permissions reviewed',
+                        details: 'Quarterly review • 12 users audited • 2 permissions revoked',
+                        user: 'Security Team',
+                        timestamp: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000), // 25 days ago
+                        icon: '👥',
+                        status: 'completed'
+                      },
+                      {
+                        type: 'incident',
+                        action: 'Disk space warning resolved',
+                        details: 'INC-2024-004 • Severity: P3 • Log rotation applied • Space freed: 15GB',
+                        user: 'Operations Team',
+                        timestamp: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000), // 28 days ago
+                        icon: '💾',
+                        status: 'resolved'
+                      }
+                    ];
+
+                    return activities.map((activity, index) => (
+                      <div 
+                        key={index}
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'flex-start', 
+                          gap: '8px',
+                          padding: '8px',
+                          borderRadius: '4px',
+                          backgroundColor: token('color.background.neutral'),
+                          fontSize: '12px'
+                        }}
+                      >
+                        <span style={{ fontSize: '14px' }}>{activity.icon}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: '500', marginBottom: '2px' }}>
+                            {activity.action}
+                          </div>
+                          {activity.details && (
+                            <div style={{ 
+                              color: token('color.text.subtle'), 
+                              fontSize: '11px',
+                              marginBottom: '4px',
+                              lineHeight: '1.3'
+                            }}>
+                              {activity.details}
+                            </div>
+                          )}
+                          <div style={{ 
+                            color: token('color.text.subtle'), 
+                            fontSize: '11px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}>
+                            <span>by {activity.user}</span>
+                            <span>{activity.timestamp.toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
               </DrawerContent>
             </DrawerSection>
           </>
