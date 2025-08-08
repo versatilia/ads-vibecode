@@ -82,12 +82,12 @@ const CheckboxContainer = styled.div`
   color: ${token('color.text')};
 `;
 
-const Legend = styled.div`
+const Legend = styled.div<{ isDarkMode: boolean }>`
   position: absolute;
   top: 80px;
   left: ${token('space.300')};
   z-index: 1000;
-  background: white;
+  background: ${props => props.isDarkMode ? token('elevation.surface') : 'white'};
   border: 1px solid ${token('color.border')};
   border-radius: 6px;
   padding: ${token('space.200')};
@@ -201,9 +201,10 @@ interface DependencyMapProps {
     businessUnits: any[];
   };
   onResetApp?: () => void;
+  isDarkMode?: boolean;
 }
 
-const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData, onResetApp }) => {
+const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData, onResetApp, isDarkMode = false }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [filterState, setFilterState] = useState<FilterState>({
     selectedDomains: [], // Start with no domains selected
@@ -221,7 +222,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
   const [selectedNode, setSelectedNode] = useState<DependencyNode | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const simulationRef = useRef<d3.Simulation<any, any> | null>(null);
-  const currentTheme = 'light';
+
 
   // Create color scales
   const domainColorScale = d3.scaleOrdinal<string, string>()
@@ -303,12 +304,12 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
       simulationRef.current.stop();
     }
 
-    // Light mode colors only
-    const nodeBackgroundColor = '#FFFFFF';
-    const borderColor = '#DFE1E6';
-    const textColor = '#172B4D';
-    const linkColor = '#42526E';
-    const warningIconBg = '#FFFFFF';
+    // Dynamic colors based on theme
+    const nodeBackgroundColor = isDarkMode ? token('elevation.surface') : '#FFFFFF';
+    const borderColor = isDarkMode ? token('color.border') : '#DFE1E6';
+    const textColor = isDarkMode ? token('color.text') : '#172B4D';
+    const linkColor = isDarkMode ? token('color.border.bold') : '#42526E';
+    const warningIconBg = isDarkMode ? token('elevation.surface') : '#FFFFFF';
     const warningIconBorder = '#FF5630';
 
     // Create force simulation with much better spacing to accommodate curved lines
@@ -336,7 +337,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
       .attr('orient', 'auto')
       .append('path')
       .attr('d', 'M0,-5L10,0L0,5')
-      .attr('fill', '#FF69B4');
+      .attr('fill', isDarkMode ? '#FF85CC' : '#FF69B4'); // Lighter pink for dark mode
     
     // Horizontal dependency arrow (green)
     defs.append('marker')
@@ -349,7 +350,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
       .attr('orient', 'auto')
       .append('path')
       .attr('d', 'M0,-5L10,0L0,5')
-      .attr('fill', '#36B37E');
+      .attr('fill', isDarkMode ? '#4CAF93' : '#36B37E'); // Lighter green for dark mode
     
     // Blast radius arrow (red)
     defs.append('marker')
@@ -362,7 +363,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
       .attr('orient', 'auto')
       .append('path')
       .attr('d', 'M0,-5L10,0L0,5')
-      .attr('fill', '#FF5630');
+      .attr('fill', '#FF5630'); // Keep red consistent for alerts
 
     // Create curved links
     const links = g.append('g')
@@ -382,9 +383,9 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         }
         // Different colors for vertical vs horizontal dependencies
         if (d.type === 'vertical') {
-          return '#FF69B4'; // Pink for vertical
+          return isDarkMode ? '#FF85CC' : '#FF69B4'; // Lighter pink for dark mode
         } else {
-          return '#36B37E'; // Green for horizontal
+          return isDarkMode ? '#4CAF93' : '#36B37E'; // Lighter green for dark mode
         }
       })
       .attr('stroke-width', (d: any) => {
@@ -743,7 +744,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         simulationRef.current.stop();
       }
     };
-  }, [filteredNodes, filteredLinks, filterState.showBlastRadius, filterState.blastRadiusData]);
+  }, [filteredNodes, filteredLinks, filterState.showBlastRadius, filterState.blastRadiusData, isDarkMode]);
 
   // Removed highlightDependencies function to prevent map expansion and line disappearance
 
@@ -915,7 +916,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         </HeaderRight>
       </Header>
 
-      <Legend>
+      <Legend isDarkMode={isDarkMode}>
         <ControlGroup>
           <Select
             inputId="product-select"
@@ -953,7 +954,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
                 fontSize: '12px',
                 width: '100%'
               }),
-              option: (provided: any, state: any) => ({
+              option: (provided: any) => ({
                 ...provided,
                 fontSize: '12px',
                 padding: '8px 12px'
@@ -1003,7 +1004,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
                 fontSize: '12px',
                 width: '100%'
               }),
-              option: (provided: any, state: any) => ({
+              option: (provided: any) => ({
                 ...provided,
                 fontSize: '12px',
                 padding: '8px 12px'
@@ -1053,7 +1054,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
                 fontSize: '12px',
                 width: '100%'
               }),
-              option: (provided: any, state: any) => ({
+              option: (provided: any) => ({
                 ...provided,
                 fontSize: '12px',
                 padding: '8px 12px'
@@ -1151,7 +1152,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
                 fontSize: '12px',
                 width: '100%'
               }),
-              option: (provided: any, state: any) => ({
+              option: (provided: any) => ({
                 ...provided,
                 fontSize: '12px',
                 padding: '8px 12px',
@@ -1279,7 +1280,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
                 fontSize: '12px',
                 width: '100%'
               }),
-              option: (provided: any, state: any) => ({
+              option: (provided: any) => ({
                 ...provided,
                 fontSize: '12px',
                 padding: '8px 12px'
@@ -1340,7 +1341,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
           </div>
         </ControlGroup>
 
-        <div style={{ marginTop: token('space.200'), paddingTop: token('space.200'), borderTop: `1px solid ${token('color.border')}` }}>
+        <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: `1px solid ${token('color.border')}` }}>
           <LegendHeading>
             <Text weight="bold" size="small">Node Types</Text>
           </LegendHeading>
@@ -1369,7 +1370,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
             <span>Infrastructure</span>
           </LegendItem>
         </div>
-        <div style={{ marginTop: token('space.200'), paddingTop: token('space.200'), borderTop: `1px solid ${token('color.border')}` }}>
+        <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: `1px solid ${token('color.border')}` }}>
           <LegendHeading>
             <Text weight="bold" size="small">Dependency Types</Text>
           </LegendHeading>
@@ -1400,7 +1401,7 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
 
       {tooltip && (
         <NodeTooltip
-          isDarkMode={false}
+          isDarkMode={isDarkMode}
           style={{
             left: tooltip.x,
             top: tooltip.y
@@ -1618,6 +1619,32 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <OwnerAvatar 
+                      owner={data.businessUnits.find(bu => bu.name === selectedNode.businessUnit)?.owner || { id: '', name: 'Unknown', avatar: '', email: '' }} 
+                      size={20} 
+                    />
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 'bold' }}>Business Unit Owner</div>
+                      <div style={{ fontSize: '11px', color: '#6B778C' }}>
+                        {data.businessUnits.find(bu => bu.name === selectedNode.businessUnit)?.owner.name || 'Unknown'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <OwnerAvatar 
+                      owner={data.products.find(p => p.id === selectedNode.product)?.owner || { id: '', name: 'Unknown', avatar: '', email: '' }} 
+                      size={20} 
+                    />
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 'bold' }}>Product Owner</div>
+                      <div style={{ fontSize: '11px', color: '#6B778C' }}>
+                        {data.products.find(p => p.id === selectedNode.product)?.owner.name || 'Unknown'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <OwnerAvatar 
                       owner={data.domains.find(d => d.id === selectedNode.domain)?.owner || { id: '', name: 'Unknown', avatar: '', email: '' }} 
                       size={20} 
                     />
@@ -1638,32 +1665,6 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
                       <div style={{ fontSize: '12px', fontWeight: 'bold' }}>Team Owner</div>
                       <div style={{ fontSize: '11px', color: '#6B778C' }}>
                         {data.teams.find(t => t.id === selectedNode.team)?.owner.name || 'Unknown'}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <OwnerAvatar 
-                      owner={data.products.find(p => p.id === selectedNode.product)?.owner || { id: '', name: 'Unknown', avatar: '', email: '' }} 
-                      size={20} 
-                    />
-                    <div>
-                      <div style={{ fontSize: '12px', fontWeight: 'bold' }}>Product Owner</div>
-                      <div style={{ fontSize: '11px', color: '#6B778C' }}>
-                        {data.products.find(p => p.id === selectedNode.product)?.owner.name || 'Unknown'}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <OwnerAvatar 
-                      owner={data.businessUnits.find(bu => bu.name === selectedNode.businessUnit)?.owner || { id: '', name: 'Unknown', avatar: '', email: '' }} 
-                      size={20} 
-                    />
-                    <div>
-                      <div style={{ fontSize: '12px', fontWeight: 'bold' }}>Business Unit Owner</div>
-                      <div style={{ fontSize: '11px', color: '#6B778C' }}>
-                        {data.businessUnits.find(bu => bu.name === selectedNode.businessUnit)?.owner.name || 'Unknown'}
                       </div>
                     </div>
                   </div>
