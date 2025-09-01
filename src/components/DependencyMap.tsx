@@ -462,11 +462,21 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         console.log('Mouse over:', d.name);
         event.stopPropagation(); // Prevent zoom interference
         showTooltip(event, d);
+        
+        // Show plus icon on hover
+        const nodeIndex = filteredNodes.indexOf(d);
+        plusIconBg.filter((_, i) => i === nodeIndex).style('opacity', 1);
+        plusIconText.filter((_, i) => i === nodeIndex).style('opacity', 1);
       })
       .on('mouseout', (event, d) => {
         console.log('Mouse out:', d.name);
         event.stopPropagation(); // Prevent zoom interference
         hideTooltip();
+        
+        // Hide plus icon when not hovering
+        const nodeIndex = filteredNodes.indexOf(d);
+        plusIconBg.filter((_, i) => i === nodeIndex).style('opacity', 0);
+        plusIconText.filter((_, i) => i === nodeIndex).style('opacity', 0);
       })
       .on('click', (event, d) => {
         console.log('Click on:', d.name);
@@ -547,6 +557,31 @@ const DependencyMap: React.FC<DependencyMapProps> = ({ data = dependencyMapData,
         }
         return 1;
       });
+
+    // Add plus icon background circle (hidden by default)
+    const plusIconBg = nodes.append('circle')
+      .attr('cx', (d: any) => Math.max(140, d.name.length * 10) - 15)
+      .attr('cy', -15)
+      .attr('r', 12)
+      .attr('fill', token('color.background.accent.blue.subtle'))
+      .attr('stroke', token('color.border.accent.blue'))
+      .attr('stroke-width', 2)
+      .style('opacity', 0)
+      .style('pointer-events', 'none')
+      .style('transition', 'opacity 0.2s ease');
+
+    // Add plus icon text (hidden by default)
+    const plusIconText = nodes.append('text')
+      .attr('x', (d: any) => Math.max(140, d.name.length * 10) - 15)
+      .attr('y', -10)
+      .attr('text-anchor', 'middle')
+      .attr('fill', token('color.text.accent.blue'))
+      .attr('font-size', '16px')
+      .attr('font-weight', 'bold')
+      .style('opacity', 0)
+      .style('pointer-events', 'none')
+      .style('transition', 'opacity 0.2s ease')
+      .text('+');
 
     // Add warning icons to affected nodes
     nodes.filter((d: any) => {
